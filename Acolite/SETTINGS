@@ -1,0 +1,25 @@
+inputfile=/home/henry/Documents/Sat_Data/unprocessed/S2A_MSIL1C_20210918T160931_N0301_R140_T16QCD_20210918T213427.SAFE
+output=/home/henry/Documents/Sat_Data/processed
+
+# dsf algorithm
+aerosol_correction=dark_spectrum
+
+dsf_exclude_bands=B9, B10
+
+# ROI
+polygon=/home/henry/Documents/Sat_Data/poly.geojson
+
+# rayleigh reflectance
+l2w_parameters= rhorc_*
+
+# GeoTIFF export options
+l2r_export_geotiff=True
+l2w_export_geotiff=True
+
+# delete .nc once made to geotiff
+l1r_delete_netcdf=True
+l2r_delete_netcdf=True
+l2w_delete_netcdf=True
+
+# output res
+s2_target_res=10

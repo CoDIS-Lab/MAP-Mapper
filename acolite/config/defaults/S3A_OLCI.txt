@@ -1,0 +1,19 @@
+## ACOLITE default settings for S3A_OLCI
+
+## copy datasets from L1R to L2R
+copy_datasets=lon,lat,sza,vza,saa,vaa,raa,rhot_*
+
+## dark spectrum fitting options
+dsf_aot_estimate=tiled
+resolved_geometry=True
+gains_toa=1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+dsf_intercept_pixels=200
+dsf_tile_dimensions=120,120
+dsf_exclude_bands=Oa01,Oa02
+dsf_smooth_aot=True
+dsf_smooth_box=10,10
+dsf_interface_reflectance=True
+
+l2w_mask_wave=1020
+l2w_mask_threshold=0.05
+default_projection_resolution=300,300

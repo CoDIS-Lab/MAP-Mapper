@@ -1,0 +1,14 @@
+name: marida
+channels:
+  - defaults
+dependencies:
+  - pip
+  - python==3.7.1
+  - pytables==3.6.1
+  - tqdm
+  - pandas=1.2.4
+  - scikit-image==0.18.1
+  - rasterio==1.0.21
+  - gdal==2.3.3
+  - scikit-learn==0.24.2
+prefix: /home/henry/anaconda3/envs/marida
