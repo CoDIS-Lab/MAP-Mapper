@@ -1,0 +1,223 @@
+2022-06-08 10:44:20: Run ID - 20220608_104420
+2022-06-08 10:44:20: Starting conversion of 1 scenes
+2022-06-08 10:44:20: Starting conversion of /home/henry/PycharmProjects/plastic_pipeline/data/unprocessed/S2A_MSIL1C_20210918T160931_N0301_R140_T16QCD_20210918T213427.SAFE
+2022-06-08 10:44:20: Importing metadata from L1C_T16QCD_A032598_20210918T162840
+2022-06-08 10:44:20: Using limit from polygon envelope: [15.671, -88.956, 16.5, -87.243]
+2022-06-08 10:44:20: clip mask
+2022-06-08 10:44:20: (3503, 10980)
+2022-06-08 10:44:20: Reading per pixel geometry
+2022-06-08 10:44:21: Computing band average per detector geometry
+2022-06-08 10:44:21: Detector 1
+2022-06-08 10:44:21: Detector 2
+2022-06-08 10:44:21: Detector 3
+2022-06-08 10:44:21: Detector 4
+2022-06-08 10:44:27: Wrote raa (3503, 10980)
+2022-06-08 10:44:27: Wrote vza (3503, 10980)
+2022-06-08 10:44:27: Wrote sza (3503, 10980)
+2022-06-08 10:44:27: Writing geolocation lon/lat
+2022-06-08 10:44:39: (3503, 10980)
+2022-06-08 10:44:39: Wrote lon
+2022-06-08 10:44:39: (3503, 10980)
+2022-06-08 10:44:40: Wrote lat
+2022-06-08 10:44:40: Converting bands
+2022-06-08 10:44:42: Converting bands: Wrote rhot_443 ((3503, 10980))
+2022-06-08 10:44:45: Converting bands: Wrote rhot_492 ((3503, 10980))
+2022-06-08 10:44:48: Converting bands: Wrote rhot_560 ((3503, 10980))
+2022-06-08 10:44:51: Converting bands: Wrote rhot_665 ((3503, 10980))
+2022-06-08 10:44:54: Converting bands: Wrote rhot_704 ((3503, 10980))
+2022-06-08 10:44:56: Converting bands: Wrote rhot_740 ((3503, 10980))
+2022-06-08 10:44:59: Converting bands: Wrote rhot_783 ((3503, 10980))
+2022-06-08 10:45:02: Converting bands: Wrote rhot_833 ((3503, 10980))
+2022-06-08 10:45:05: Converting bands: Wrote rhot_865 ((3503, 10980))
+2022-06-08 10:45:07: Converting bands: Wrote rhot_945 ((3503, 10980))
+2022-06-08 10:45:10: Converting bands: Wrote rhot_1373 ((3503, 10980))
+2022-06-08 10:45:12: Converting bands: Wrote rhot_1614 ((3503, 10980))
+2022-06-08 10:45:15: Converting bands: Wrote rhot_2202 ((3503, 10980))
+2022-06-08 10:45:15: Conversion took 54.6 seconds
+2022-06-08 10:45:15: Created /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L1R.nc
+2022-06-08 10:45:20: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L1R_rgb_rhot.png
+2022-06-08 10:45:20: Running acolite for /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L1R.nc
+2022-06-08 10:45:21: EARTHDATA user name and password required for download of https://oceandata.sci.gsfc.nasa.gov/ob/getfile/N202126100_MET_NCEPR2_6h.hdf.bz2
+2022-06-08 10:45:21: EARTHDATA user name and password required for download of https://oceandata.sci.gsfc.nasa.gov/ob/getfile/N202126106_MET_NCEPR2_6h.hdf.bz2
+2022-06-08 10:45:21: EARTHDATA user name and password required for download of https://oceandata.sci.gsfc.nasa.gov/ob/getfile/N202126112_MET_NCEPR2_6h.hdf.bz2
+2022-06-08 10:45:21: EARTHDATA user name and password required for download of https://oceandata.sci.gsfc.nasa.gov/ob/getfile/N202126118_MET_NCEPR2_6h.hdf.bz2
+2022-06-08 10:45:21: EARTHDATA user name and password required for download of https://oceandata.sci.gsfc.nasa.gov/ob/getfile/N202126200_MET_NCEPR2_6h.hdf.bz2
+2022-06-08 10:45:21: EARTHDATA user name and password required for download of https://oceandata.sci.gsfc.nasa.gov/ob/getfile/N202126100_O3_AURAOMI_24h.hdf
+2022-06-08 10:45:21: Using DSF atmospheric correction
+2022-06-08 10:45:22: Processing with 3960 tiles (36x110 tiles of 100x100 pixels)
+2022-06-08 10:45:22: Writing lon
+2022-06-08 10:45:23: Wrote lon
+2022-06-08 10:45:23: Writing lat
+2022-06-08 10:45:23: Wrote lat
+2022-06-08 10:45:23: Loading LUTs
+2022-06-08 10:45:23: romix+rsky_t
+2022-06-08 10:45:23: True
+2022-06-08 10:45:25: Loading LUTs took 1.8 s
+2022-06-08 10:45:25: 1
+2022-06-08 10:45:25: rhot_443
+2022-06-08 10:45:27: S2A_MSI/B1 ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:27: S2A_MSI/B1 ACOLITE-LUT-202110-MOD2 took 0.005s (RevLUT)
+2022-06-08 10:45:27: 2
+2022-06-08 10:45:27: rhot_492
+2022-06-08 10:45:31: S2A_MSI/B2 ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:31: S2A_MSI/B2 ACOLITE-LUT-202110-MOD2 took 0.005s (RevLUT)
+2022-06-08 10:45:31: 3
+2022-06-08 10:45:31: rhot_560
+2022-06-08 10:45:34: S2A_MSI/B3 ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:34: S2A_MSI/B3 ACOLITE-LUT-202110-MOD2 took 0.004s (RevLUT)
+2022-06-08 10:45:34: 4
+2022-06-08 10:45:34: rhot_665
+2022-06-08 10:45:37: S2A_MSI/B4 ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:37: S2A_MSI/B4 ACOLITE-LUT-202110-MOD2 took 0.004s (RevLUT)
+2022-06-08 10:45:37: 5
+2022-06-08 10:45:37: rhot_704
+2022-06-08 10:45:39: S2A_MSI/B5 ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:39: S2A_MSI/B5 ACOLITE-LUT-202110-MOD2 took 0.005s (RevLUT)
+2022-06-08 10:45:39: 6
+2022-06-08 10:45:39: rhot_740
+2022-06-08 10:45:42: S2A_MSI/B6 ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:42: S2A_MSI/B6 ACOLITE-LUT-202110-MOD2 took 0.005s (RevLUT)
+2022-06-08 10:45:42: 7
+2022-06-08 10:45:42: rhot_783
+2022-06-08 10:45:45: S2A_MSI/B7 ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:45: S2A_MSI/B7 ACOLITE-LUT-202110-MOD2 took 0.004s (RevLUT)
+2022-06-08 10:45:45: 8
+2022-06-08 10:45:45: rhot_833
+2022-06-08 10:45:48: S2A_MSI/B8 ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:48: S2A_MSI/B8 ACOLITE-LUT-202110-MOD2 took 0.004s (RevLUT)
+2022-06-08 10:45:48: 8A
+2022-06-08 10:45:48: rhot_865
+2022-06-08 10:45:51: S2A_MSI/B8A ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:51: S2A_MSI/B8A ACOLITE-LUT-202110-MOD2 took 0.005s (RevLUT)
+2022-06-08 10:45:51: 11
+2022-06-08 10:45:51: rhot_1614
+2022-06-08 10:45:53: S2A_MSI/B11 ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:53: S2A_MSI/B11 ACOLITE-LUT-202110-MOD2 took 0.004s (RevLUT)
+2022-06-08 10:45:53: 12
+2022-06-08 10:45:53: rhot_2202
+2022-06-08 10:45:56: S2A_MSI/B12 ACOLITE-LUT-202110-MOD1 took 0.005s (RevLUT)
+2022-06-08 10:45:56: S2A_MSI/B12 ACOLITE-LUT-202110-MOD2 took 0.004s (RevLUT)
+2022-06-08 10:45:56: Choosing best fitting model: min_drmsd (2 bands)
+2022-06-08 10:45:56: Computing RMSD for model ACOLITE-LUT-202110-MOD1
+2022-06-08 10:45:56: Computing RMSD for model ACOLITE-LUT-202110-MOD2
+2022-06-08 10:45:56: use_revlut
+2022-06-08 10:45:56: True
+2022-06-08 10:45:57: Wrote rhot_443
+2022-06-08 10:45:57: Computing surface reflectance
+2022-06-08 10:45:57: 1
+2022-06-08 10:45:57: 443
+2022-06-08 10:45:57: 0.998
+2022-06-08 10:45:57: Interpolating tiles
+2022-06-08 10:46:04: Wrote rhos_443
+2022-06-08 10:46:04: S2A_MSI/B1 took 6.9s (RevLUT)
+2022-06-08 10:46:04: Wrote rhot_492
+2022-06-08 10:46:04: Computing surface reflectance
+2022-06-08 10:46:04: 2
+2022-06-08 10:46:04: 492
+2022-06-08 10:46:04: 0.983
+2022-06-08 10:46:04: Interpolating tiles
+2022-06-08 10:46:10: Wrote rhos_492
+2022-06-08 10:46:10: S2A_MSI/B2 took 6.2s (RevLUT)
+2022-06-08 10:46:10: Wrote rhot_560
+2022-06-08 10:46:10: Computing surface reflectance
+2022-06-08 10:46:10: 3
+2022-06-08 10:46:10: 560
+2022-06-08 10:46:10: 0.933
+2022-06-08 10:46:10: Interpolating tiles
+2022-06-08 10:46:16: Wrote rhos_560
+2022-06-08 10:46:16: S2A_MSI/B3 took 6.2s (RevLUT)
+2022-06-08 10:46:17: Wrote rhot_665
+2022-06-08 10:46:17: Computing surface reflectance
+2022-06-08 10:46:17: 4
+2022-06-08 10:46:17: 665
+2022-06-08 10:46:17: 0.961
+2022-06-08 10:46:17: Interpolating tiles
+2022-06-08 10:46:23: Wrote rhos_665
+2022-06-08 10:46:23: S2A_MSI/B4 took 6.1s (RevLUT)
+2022-06-08 10:46:23: Wrote rhot_704
+2022-06-08 10:46:23: Computing surface reflectance
+2022-06-08 10:46:23: 5
+2022-06-08 10:46:23: 704
+2022-06-08 10:46:23: 0.955
+2022-06-08 10:46:23: Interpolating tiles
+2022-06-08 10:46:29: Wrote rhos_704
+2022-06-08 10:46:29: S2A_MSI/B5 took 6.0s (RevLUT)
+2022-06-08 10:46:30: Wrote rhot_740
+2022-06-08 10:46:30: Computing surface reflectance
+2022-06-08 10:46:30: 6
+2022-06-08 10:46:30: 740
+2022-06-08 10:46:30: 0.964
+2022-06-08 10:46:30: Interpolating tiles
+2022-06-08 10:46:36: Wrote rhos_740
+2022-06-08 10:46:36: S2A_MSI/B6 took 6.2s (RevLUT)
+2022-06-08 10:46:36: Wrote rhot_783
+2022-06-08 10:46:36: Computing surface reflectance
+2022-06-08 10:46:36: 7
+2022-06-08 10:46:36: 783
+2022-06-08 10:46:36: 0.986
+2022-06-08 10:46:36: Interpolating tiles
+2022-06-08 10:46:42: Wrote rhos_783
+2022-06-08 10:46:42: S2A_MSI/B7 took 6.1s (RevLUT)
+2022-06-08 10:46:42: Wrote rhot_833
+2022-06-08 10:46:42: Computing surface reflectance
+2022-06-08 10:46:42: 8
+2022-06-08 10:46:42: 833
+2022-06-08 10:46:42: 0.944
+2022-06-08 10:46:43: Interpolating tiles
+2022-06-08 10:46:49: Wrote rhos_833
+2022-06-08 10:46:49: S2A_MSI/B8 took 6.1s (RevLUT)
+2022-06-08 10:46:49: Wrote rhot_865
+2022-06-08 10:46:49: Computing surface reflectance
+2022-06-08 10:46:49: 8A
+2022-06-08 10:46:49: 865
+2022-06-08 10:46:49: 0.997
+2022-06-08 10:46:49: Interpolating tiles
+2022-06-08 10:46:55: Wrote rhos_865
+2022-06-08 10:46:55: S2A_MSI/B8A took 6.1s (RevLUT)
+2022-06-08 10:46:55: Wrote rhot_945
+2022-06-08 10:46:56: Wrote rhot_1373
+2022-06-08 10:46:56: Wrote rhot_1614
+2022-06-08 10:46:56: Computing surface reflectance
+2022-06-08 10:46:56: 11
+2022-06-08 10:46:56: 1614
+2022-06-08 10:46:56: 0.963
+2022-06-08 10:46:56: Interpolating tiles
+2022-06-08 10:47:03: Wrote rhos_1614
+2022-06-08 10:47:03: S2A_MSI/B11 took 6.6s (RevLUT)
+2022-06-08 10:47:03: Wrote rhot_2202
+2022-06-08 10:47:03: Computing surface reflectance
+2022-06-08 10:47:03: 12
+2022-06-08 10:47:03: 2202
+2022-06-08 10:47:03: 0.922
+2022-06-08 10:47:03: Interpolating tiles
+2022-06-08 10:47:09: Wrote rhos_2202
+2022-06-08 10:47:09: S2A_MSI/B12 took 6.1s (RevLUT)
+2022-06-08 10:47:09: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R.nc
+2022-06-08 10:47:10: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_443.tif
+2022-06-08 10:47:10: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_443.tif
+2022-06-08 10:47:10: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_492.tif
+2022-06-08 10:47:11: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_492.tif
+2022-06-08 10:47:11: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_560.tif
+2022-06-08 10:47:12: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_560.tif
+2022-06-08 10:47:12: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_665.tif
+2022-06-08 10:47:13: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_665.tif
+2022-06-08 10:47:13: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_704.tif
+2022-06-08 10:47:14: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_704.tif
+2022-06-08 10:47:14: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_740.tif
+2022-06-08 10:47:14: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_740.tif
+2022-06-08 10:47:15: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_783.tif
+2022-06-08 10:47:15: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_783.tif
+2022-06-08 10:47:16: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_833.tif
+2022-06-08 10:47:16: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_833.tif
+2022-06-08 10:47:17: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_865.tif
+2022-06-08 10:47:17: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_865.tif
+2022-06-08 10:47:18: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_945.tif
+2022-06-08 10:47:18: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_1373.tif
+2022-06-08 10:47:19: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_1614.tif
+2022-06-08 10:47:19: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_1614.tif
+2022-06-08 10:47:20: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhot_2202.tif
+2022-06-08 10:47:20: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rhos_2202.tif
+2022-06-08 10:47:26: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2R_rgb_rhos.png
+2022-06-08 10:48:26: Writing lon
+2022-06-08 10:48:26: Writing lat
+2022-06-08 10:48:27: Wrote /home/henry/PycharmProjects/plastic_pipeline/data/processed/S2A_MSI_2021_09_18_16_28_59_T16QCD_L2W_l2_flags.tif

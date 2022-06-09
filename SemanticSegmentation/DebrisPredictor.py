@@ -53,7 +53,7 @@ def main(options):
 
     with torch.no_grad():
                 
-        path = os.path.join(base_path, "patches")
+        path = os.path.join(base_path, "data", "patches")
         ROIs = [name for name in os.listdir(path)]
         impute_nan = np.tile(bands_mean, (256,256,1))
                     
@@ -101,9 +101,9 @@ if __name__ == "__main__":
     parser.add_argument('--hidden_channels', default=16, type=int, help='Number of hidden features')
     
     # Unet model path
-    parser.add_argument('--model_path', default=os.path.join(base_path, 'SemanticSegmentation' 'unet', 'trained_models', 'model.pth'), help='Path to Unet pytorch model')
+    parser.add_argument('--model_path', default=os.path.join(base_path, 'SemanticSegmentation', 'unet', 'trained_models', 'model.pth'), help='Path to Unet pytorch model')
     
-    parser.add_argument('--gen_masks_path', default=os.path.join(base_path, 'Data', 'predicted_unet'), help='Path to where to produce store predictions')
+    parser.add_argument('--gen_masks_path', default=os.path.join(base_path, 'data', 'predicted_unet'), help='Path to where to produce store predictions')
 
     args = parser.parse_args()
     options = vars(args)  # convert to ordinary dict
