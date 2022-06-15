@@ -6,8 +6,12 @@ aerosol_correction=dark_spectrum
 
 dsf_exclude_bands=B9, B10
 
+
 # ROI
-polygon=/home/henry/Documents/Sat_Data/poly.geojson
+polygon=/home/henry/PycharmProjects/plastic_pipeline/poly.geojson
+
+# resolves issue with none type see this thread - https://odnature.naturalsciences.be/remsem/acolite-forum/viewtopic.php?t=319
+geometry_type=grids
 
 # rayleigh reflectance
 l2w_parameters= rhorc_*
@@ -23,3 +27,12 @@ l2w_delete_netcdf=True
 
 # output res
 s2_target_res=10
+
+# masking
+l2w_mask_threshold=0.00001
+
+map_l2w=True
+#l2w_mask_smooth_sigma=1
+
+l2w_mask_cirrus_threshold=0.0025
+l2w_mask_smooth=True

@@ -1,0 +1,29 @@
+2022-06-12 15:30:43: Run ID - 20220612_153043
+2022-06-12 15:30:43: Starting conversion of 1 scenes
+2022-06-12 15:30:43: Starting conversion of /home/henry/PycharmProjects/plastic_pipeline/data/unprocessed/S2A_MSIL1C_20210918T160931_N0301_R140_T16QCD_20210918T213427.SAFE
+2022-06-12 15:30:43: Importing metadata from L1C_T16QCD_A032598_20210918T162840
+2022-06-12 15:30:43: Starting conversion of 1 scenes
+2022-06-12 15:30:43: Starting conversion of /home/henry/PycharmProjects/plastic_pipeline/data/unprocessed/S2A_MSIL1C_20210918T160931_N0301_R140_T16PCC_20210918T213427.SAFE
+2022-06-12 15:30:43: Importing metadata from L1C_T16PCC_A032598_20210918T162840
+2022-06-12 15:30:43: Starting conversion of 1 scenes
+2022-06-12 15:30:43: Starting conversion of 1 scenes
+2022-06-12 15:30:43: Starting conversion of /home/henry/PycharmProjects/plastic_pipeline/data/unprocessed/S2A_MSIL1C_20210918T160931_N0301_R140_T16PDC_20210918T213427.SAFE
+2022-06-12 15:30:43: Starting conversion of /home/henry/PycharmProjects/plastic_pipeline/data/unprocessed/S2A_MSIL1C_20210918T160931_N0301_R140_T16QDD_20210918T213427.SAFE
+2022-06-12 15:30:43: Importing metadata from L1C_T16PDC_A032598_20210918T162840
+2022-06-12 15:30:43: Importing metadata from L1C_T16QDD_A032598_20210918T162840
+2022-06-12 15:30:43: Using limit from polygon envelope: [15.671, -88.956, 16.5, -87.243]
+2022-06-12 15:30:43: Using limit from polygon envelope: [15.671, -88.956, 16.5, -87.243]
+2022-06-12 15:30:43: Using limit from polygon envelope: [15.671, -88.956, 16.5, -87.243]
+2022-06-12 15:30:43: Using limit from polygon envelope: [15.671, -88.956, 16.5, -87.243]
+2022-06-12 15:30:43: clip mask
+2022-06-12 15:30:43: (3503, 10980)
+2022-06-12 15:30:43: Reading per pixel geometry
+2022-06-12 15:30:44: clip mask
+2022-06-12 15:30:44: (3503, 7411)
+2022-06-12 15:30:44: Reading per pixel geometry
+2022-06-12 15:30:44: clip mask
+2022-06-12 15:30:44: (6744, 10980)
+2022-06-12 15:30:44: Reading per pixel geometry
+2022-06-12 15:30:44: clip mask
+2022-06-12 15:30:44: (6744, 7411)
+2022-06-12 15:30:44: Reading per pixel geometry

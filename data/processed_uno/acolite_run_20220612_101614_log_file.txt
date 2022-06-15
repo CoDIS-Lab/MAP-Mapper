@@ -1,0 +1,8 @@
+2022-06-12 10:16:14: Run ID - 20220612_101614
+2022-06-12 10:16:14: Starting conversion of 1 scenes
+2022-06-12 10:16:14: Starting conversion of /home/henry/PycharmProjects/plastic_pipeline/data/unprocessed/S2A_MSIL1C_20210918T160931_N0301_R140_T16PDC_20210918T213427.SAFE
+2022-06-12 10:16:14: Importing metadata from L1C_T16PDC_A032598_20210918T162840
+2022-06-12 10:16:14: Using limit from polygon envelope: [15.671, -88.956, 16.5, -87.243]
+2022-06-12 10:16:14: clip mask
+2022-06-12 10:16:14: (6744, 7411)
+2022-06-12 10:16:14: Reading per pixel geometry
