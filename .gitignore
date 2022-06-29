@@ -2,3 +2,9 @@
 *.zip
 *.SAFE
 *.env
+*.png
+*.nc
+*.txt
+/data
+/acolite-main
+/acolite_api/fmask_temp
