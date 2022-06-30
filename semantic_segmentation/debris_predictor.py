@@ -41,7 +41,7 @@ def predict_with_smooth_blending():
     options = {"input_channels": 11,
                "output_channels": 11,
                "hidden_channels": 16,
-               "model_path": os.path.join(base_path, 'SemanticSegmentation', 'unet', 'trained_models', 'model.pth'),
+               "model_path": os.path.join(base_path, 'semantic_segmentation', 'unet', 'trained_models', 'model.pth'),
                "gen_masks_path": os.path.join(base_path, 'data', 'predicted_unet')}
 
     transform_test = transforms.Compose([transforms.ToTensor()])

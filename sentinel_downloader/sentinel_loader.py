@@ -68,7 +68,7 @@ class SentinelLoader(object):
     def run(self):
         self.get_product_data()
         if not self.products:
-            print("No products found for date provided with max cloud cover percentage of " + str(self.cloud_percentage))
+            print("No products found for " + self.start_date + " with max cloud cover percentage of " + str(self.cloud_percentage[1]))
         self.download_path = os.path.join(base_path, "data", "unprocessed")
         self.download(directory_path=self.download_path)
         self.get_download_list()

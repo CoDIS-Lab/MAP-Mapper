@@ -15,6 +15,7 @@ from rasterio.merge import merge
 from sentinelsat import read_geojson
 from shapely import ops
 
+from acolite_api.fmask_script import run_fmask
 from paths import base_path
 from semantic_segmentation.debris_predictor import predict_with_smooth_blending
 from utils.dir_management import clean_dir, delete_dir, clean_directories
@@ -183,7 +184,7 @@ class DatasetLoader:
 
     def crop_non_water_mask(self, polygon, crs):
         projected_shape = project_wsg_shape_to_csr(shapely.geometry.shape(polygon), crs)
-        with rasterio.open(os.path.join(base_path, "data", "merged_geotiffs",
+        with rasterio.open(os.path.join(base_path, "data", "non_water_mask",
                                         self.id + "_" + self.date + "_cloud.tif")) as dataset:
             out_image, out_transform = rasterio.mask.mask(dataset, [projected_shape], crop=True)
             out_meta = dataset.meta.copy()
@@ -255,9 +256,10 @@ class DatasetLoader:
         predict_with_smooth_blending()
         # merge predicted masks into one file
         self.merge_tiles(directory=os.path.join(base_path, "data", "predicted_unet"), mode="masks")
-
-        script = os.path.join(base_path, "Acolite", "fmask_script.py")
-        subprocess.call([sys.executable, script])
+        #
+        # script = os.path.join(base_path, "Acolite", "fmask_script.py")
+        # subprocess.call([sys.executable, script])
+        run_fmask()
         self.merge_tiles(directory=os.path.join(base_path, "data", "non_water_mask"), mode="clouds")
 
         poly = read_geojson(os.path.join(base_path, "poly.geojson"))
