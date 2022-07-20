@@ -12,7 +12,7 @@ password = os.environ.get('PASSWORD')
 
 class SentinelLoader(object):
 
-    def __init__(self, start_date, end_date, max_cloud_percentage):
+    def __init__(self, start_date, end_date, max_cloud_percentage, tile_id=None):
         # connect to api
         self.cloud_percentage = (0, max_cloud_percentage[0])
         self.download_path = None
@@ -24,14 +24,21 @@ class SentinelLoader(object):
         # for searching by time
         self.start_date = start_date
         self.end_date = end_date
+        self.tile_id = tile_id
 
     # query api for matching products
     def get_product_data(self):
-        self.products = self.api.query(self.footprint,
-                                       date=(self.start_date, self.end_date),
-                                       platformname='Sentinel-2',
-                                       producttype='S2MSI1C',
-                                       cloudcoverpercentage=self.cloud_percentage)
+
+        query_kwargs = {
+            'platformname': 'Sentinel-2',
+            'producttype': 'S2MSI1C',
+            'date': (self.start_date, self.end_date)}
+
+        kw = query_kwargs.copy()
+        if self.tile_id:
+            kw['tileid'] = self.tile_id[0]
+        kw['cloudcoverpercentage'] = self.cloud_percentage
+        self.products = self.api.query(self.footprint, **kw)
 
         # check for duplicate tiles (these would cause errors when merging)
         # this code keeps the newest product (by generation date)

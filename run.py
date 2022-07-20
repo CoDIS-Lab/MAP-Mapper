@@ -1,4 +1,7 @@
 import sys
+
+from acolite_api.fmask_script import run_fmask
+
 sys.path.insert(0, "/acolite_api")
 sys.path.insert(0, "/semantic_segmentation")
 sys.path.insert(0, "/sentinel_downloader")
@@ -8,7 +11,7 @@ import argparse
 import os
 import subprocess
 from sentinelsat import read_geojson
-from semantic_segmentation.dataset_loader import DatasetLoader
+from semantic_segmentation.dataset_loader import DatasetLoader, get_crs
 from utils.dir_management import setup_directories, clean_directories
 from datetime import datetime, timedelta
 import pandas as pd
@@ -35,7 +38,7 @@ if __name__ == "__main__":
     pipeline.add_argument(
         '-start_date',
         nargs=1,
-        default=today,
+        default=[today],
         type=str,
         help='start_date for sentinel 2 full_pipeline predictions to start (YYYYmmdd)',
         dest='start_date'
@@ -44,7 +47,7 @@ if __name__ == "__main__":
     pipeline.add_argument(
         '-end_date',
         nargs=1,
-        default=tomorrow,
+        default=[tomorrow],
         type=str,
         help='end_date for sentinel 2 full_pipeline predictions to end (YYYYmmdd)',
         dest="end_date"
@@ -52,10 +55,19 @@ if __name__ == "__main__":
     pipeline.add_argument(
         '-cloud_percentage',
         nargs=1,
-        default=50,
+        default=[50],
         type=int,
         help='maximum cloud percentage',
         dest="cloud_percentage"
+    )
+
+    pipeline.add_argument(
+        '-tile_id',
+        nargs=1,
+        default=None,
+        type=str,
+        help='tile_id',
+        dest="tile_id"
     )
 
     # partial pipeline components
@@ -67,14 +79,14 @@ if __name__ == "__main__":
         '-date',
         nargs=1,
         type=str,
-        default=datetime.today().strftime("%Y%m%d"),
+        default=[datetime.today().strftime("%Y%m%d")],
         help='use with --download to specify the date for data download', dest='date'
     )
     download.add_argument(
         '-cloud_percentage',
         nargs=1,
         type=str,
-        default=50,
+        default=[50],
         dest='cloud_percentage',
         help='use with --download to specify the date for data download'
     )
@@ -160,17 +172,17 @@ if __name__ == "__main__":
             end_date = (datetime.strptime(start_date, "%Y%m%d") + timedelta(days=1)).strftime("%Y%m%d")
             user_name = os.environ.get('USER_NAME')
             password = os.environ.get('PASSWORD')
-            SentinelLoader(start_date=start_date, end_date=end_date, max_cloud_percentage=args.cloud_percentage).run()
+            SentinelLoader(start_date=start_date, end_date=end_date, max_cloud_percentage=args.cloud_percentage, tile_id=args.tile_id).run()
 
             bundles = os.listdir(os.path.join(base_path, "data", "unprocessed"))
             print(bundles)
             # if any data to download and process
             if bundles:
                 if __name__ == '__main__':
-                    with Pool(10) as p:
+                    with Pool(40) as p:
                         print(p.map(acolite_loader, bundles))
                 print("processing files........")
-                DL = DatasetLoader()
+                DL = DatasetLoader(date=start_date)
                 DL.run_pipeline()
 
     if args.command == "download":
@@ -180,7 +192,7 @@ if __name__ == "__main__":
         user_name = os.environ.get('USER_NAME')
         password = os.environ.get('PASSWORD')
         end_date = (datetime.strptime(date, "%Y%m%d") + timedelta(days=1)).strftime("%Y%m%d")
-        SentinelLoader(start_date=date, end_date=end_date).run()
+        SentinelLoader(start_date=date, end_date=end_date, max_cloud_percentage=args.cloud_percentage).run()
 
     if args.command == "acolite":
         bundles = os.listdir(os.path.join(base_path, "data", "unprocessed"))
@@ -208,9 +220,9 @@ if __name__ == "__main__":
         DL.merge_tiles(directory=os.path.join(base_path, "data", "predicted_unet"), mode="masks")
         script = os.path.join(base_path, "acolite_api", "fmask_script.py")
         subprocess.call([sys.executable, script])
-        DL.merge_tiles(directory=os.path.join(base_path, "data", "non_water_mask"), mode="clouds")
+        DL.merge_tiles(directory=os.path.join(base_path, "data", "merged_geotiffs"), mode="clouds")
         poly = read_geojson(os.path.join(base_path, "poly.geojson"))
-        DL.crop_non_water_mask(poly, "epsg:32616")
+        DL.crop_non_water_mask(poly, crs="epsg:" + str(get_crs()))
         DL.mask_predictions()
 
     if args.command == "combine_acolite":
@@ -226,7 +238,7 @@ if __name__ == "__main__":
         DL.merge_tiles(directory=os.path.join(base_path, "data", "unmerged_geotiffs"), mode="images")
 
     if args.command == "predict":
-        DL = DatasetLoader(date=args.date[0], id=args.id[0], crs=args.crs[0])
+        DL = DatasetLoader(date=args.date[0], id=args.id[0], crs=get_crs().split(":")[1])
         predict_with_smooth_blending()
         # merge predicted masks into one file
         DL.merge_tiles(directory=os.path.join(base_path, "data", "predicted_unet"), mode="masks")
@@ -238,7 +250,9 @@ if __name__ == "__main__":
         # subprocess.call([sys.executable,  script], shell=True)
         # DL.merge_tiles(directory=os.path.join(base_path, "data", "non_water_mask"), mode="clouds")
         poly = read_geojson(os.path.join(base_path, "poly.geojson"))
-        DL.crop_non_water_mask(poly, "epsg:32616")
+        print(str(get_crs()))
+        print(str(get_crs()).lower())
+        DL.crop_non_water_mask(poly, "epsg:" + str(get_crs()))
         DL.mask_predictions()
 
     if args.command == "clean":

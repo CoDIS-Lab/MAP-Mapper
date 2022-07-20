@@ -19,20 +19,42 @@ from acolite_api.fmask_script import run_fmask
 from paths import base_path
 from semantic_segmentation.debris_predictor import predict_with_smooth_blending
 from utils.dir_management import clean_dir, delete_dir, clean_directories
+import xml.etree.ElementTree as ET
 
 merged_path = os.path.join(base_path, "data", "merged_geotiffs")
 unmerged_path = os.path.join(base_path, "data", "unmerged_geotiffs")
 
 
 # This function converts geojson polygon format to a the correct crs to enable fmask to be transposed onto the geotiff
-def project_wsg_shape_to_csr(shape, csr):
+def project_wsg_shape_to_csr(shape, crs):
     project = lambda x, y: pyproj.transform(
         pyproj.Proj(init='epsg:4326'),
-        pyproj.Proj(init=csr),
+        pyproj.Proj(init=crs),
         x,
         y
     )
     return shapely.ops.transform(project, shape)
+
+
+def get_crs():
+    xml_path = None
+    # data path of sentinel SAFE file
+    data_path = os.path.join(base_path, "data", "unprocessed")
+    for (root, dir, files) in os.walk(data_path):
+        for f in files:
+            # file containing coordinate reference system information
+            if f == "MTD_TL.xml":
+                xml_path = os.path.join(root, f)
+                break
+        if xml_path:
+            break
+    # get data from xml document
+    # get data from xml document
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    epsg = root.findall('.//HORIZONTAL_CS_CODE')[0].text
+    # returns just number component
+    return epsg.split(":")[1]
 
 
 class DatasetLoader:
@@ -51,6 +73,7 @@ class DatasetLoader:
             self.crs = kwargs.get("crs")
 
     # load processed acolite images
+
     def load_images(self):
         print("getting rhos tiff files from processed dir...")
         # only get tif files from rhos (surface Level reflectance)
@@ -108,6 +131,8 @@ class DatasetLoader:
                 big_window)
             transform = windows.transform(window, ds.transform)
             yield window, transform
+
+
 
     def merge_tiles(self, directory, mode):
         print("merging tiles... " + "mode: " + mode)
@@ -184,10 +209,12 @@ class DatasetLoader:
 
     def crop_non_water_mask(self, polygon, crs):
         projected_shape = project_wsg_shape_to_csr(shapely.geometry.shape(polygon), crs)
-        with rasterio.open(os.path.join(base_path, "data", "non_water_mask",
+        print(crs)
+        with rasterio.open(os.path.join(base_path, "data", "merged_geotiffs",
                                         self.id + "_" + self.date + "_cloud.tif")) as dataset:
             out_image, out_transform = rasterio.mask.mask(dataset, [projected_shape], crop=True)
             out_meta = dataset.meta.copy()
+            # cloud-mask is 20m resolution, but needs to be same size in pixels as sat image
             out_meta.update(
                 {"transform": out_transform, "height": out_image.shape[1] * 2, "width": out_image.shape[2] * 2})
             with rasterio.open(os.path.join(base_path, "data", "merged_geotiffs",
@@ -236,11 +263,12 @@ class DatasetLoader:
                 masked_unet[mask] = 6
                 with rasterio.open(
                         os.path.join(base_path, "data", "merged_geotiffs",
-                                     self.id + "_" + self.date + "_unet_masked.tif"),
+                                     self.id + "_" + self.date + "_prediction.tif"),
                         "w", **out_meta) as masked_prediction:
                     masked_prediction.write(np.expand_dims(masked_unet, axis=0))
 
     def run_pipeline(self):
+        self.crs = get_crs()
         # load processed acolite rhos images (assigns file path to self.tiff_files)
         self.load_images()
         # combines processed satellite images output by acolite processor (one for each band)
@@ -260,10 +288,12 @@ class DatasetLoader:
         # script = os.path.join(base_path, "Acolite", "fmask_script.py")
         # subprocess.call([sys.executable, script])
         run_fmask()
-        self.merge_tiles(directory=os.path.join(base_path, "data", "non_water_mask"), mode="clouds")
+        self.merge_tiles(directory=os.path.join(base_path, "data", "merged_geotiffs"), mode="clouds")
 
         poly = read_geojson(os.path.join(base_path, "poly.geojson"))
-        self.crop_non_water_mask(poly, "epsg:32616")
+        print(self.crs)
+        print(type(self.crs))
+        self.crop_non_water_mask(poly, self.crs)
         self.mask_predictions()
         clean_directories(self.date)
 
