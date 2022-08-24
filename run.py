@@ -1,7 +1,6 @@
 import sys
 
 from acolite_api.fmask_script import run_fmask
-
 sys.path.insert(0, "/acolite_api")
 sys.path.insert(0, "/semantic_segmentation")
 sys.path.insert(0, "/sentinel_downloader")
@@ -17,7 +16,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from semantic_segmentation.debris_predictor import predict_with_smooth_blending
 from sentinel_downloader.sentinel_loader import SentinelLoader
-from paths import base_path
+from utils.paths import base_path
 from multiprocessing import Pool
 from dotenv import load_dotenv
 
@@ -33,7 +32,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='A sentinel-2 plastic detection pipeline using the MARIDA dataset')
 
     subparsers = parser.add_subparsers(help='possible uses', dest='command')
+    test = subparsers.add_parser('test', help='test')
     pipeline = subparsers.add_parser('full', help='run full pipeline for a given ROI')
+
     # full pipeline arguments
     pipeline.add_argument(
         '-start_date',
@@ -107,11 +108,11 @@ if __name__ == "__main__":
         nargs=1,
         type=str,
         help='Tile ID',
-        dest="id"
+        dest="tile"
     )
 
     combine_acolite = subparsers.add_parser(
-        'merge_processed',
+        'combine_acolite',
         help='download sentinel-2 data'
     )
     combine_acolite.add_argument(
@@ -122,10 +123,35 @@ if __name__ == "__main__":
         help='complete acolite processing on SAFE files',
         dest="date"
     )
-
+    combine_acolite.add_argument(
+        '-id',
+        nargs=1,
+        type=str,
+        default="",
+        help='complete acolite processing on SAFE files',
+        dest="id"
+    )
     predict = subparsers.add_parser(
         'predict',
         help='make predictions on pre-existing geotiff'
+    )
+
+    predict.add_argument(
+        '-date',
+        nargs=1,
+        type=str,
+        default=[today],
+        help='complete acolite processing on SAFE files',
+        dest="date"
+    )
+
+    predict.add_argument(
+        '-tile',
+        nargs=1,
+        type=str,
+        default=None,
+        help='complete acolite processing on SAFE files',
+        dest="tile"
     )
     fmask = subparsers.add_parser(
         'fmask',
@@ -153,6 +179,32 @@ if __name__ == "__main__":
         help='WARNING! Removes all data associated with sentinel downloads, '
              'processing and predictions in the "data" directory tree'
     )
+
+    predict_from_acolite = subparsers.add_parser('predict_from_acolite', help='run full pipeline for a given ROI')
+    predict_from_acolite.add_argument(
+        '-date',
+        nargs=1,
+        type=str,
+        default=[today],
+        help='complete acolite processing on SAFE files',
+        dest="date"
+    )
+
+    predict_from_acolite.add_argument(
+        '-tile',
+        nargs=1,
+        type=str,
+        default=None,
+        help='complete acolite processing on SAFE files',
+        dest="id"
+    )
+    predict_from_acolite.add_argument(
+        '-crs',
+        nargs=1,
+        type=str,
+        default=None,
+        dest="crs"
+    )
     args = parser.parse_args()
     options = vars(args)
     print(options)
@@ -179,7 +231,7 @@ if __name__ == "__main__":
             # if any data to download and process
             if bundles:
                 if __name__ == '__main__':
-                    with Pool(40) as p:
+                    with Pool(len(bundles)) as p:
                         print(p.map(acolite_loader, bundles))
                 print("processing files........")
                 DL = DatasetLoader(date=start_date)
@@ -201,7 +253,7 @@ if __name__ == "__main__":
         if bundles:
             if __name__ == '__main__':
                 print("processing SAFE files with acolite........")
-                with Pool(10) as p:
+                with Pool(len(bundles)) as p:
                     print(p.map(acolite_loader, bundles))
 
     if args.command == "predict_from_acolite":
@@ -214,10 +266,11 @@ if __name__ == "__main__":
         # please note, this could be made more efficient by patching each tile, then merging the tiles.
         # However, care must be taken not to lose pixels due to cropping.
         # if using 1 or 2 sentinel tiles, it does not make much difference
+        DL.patch_large_image(os.path.join(base_path, "data", "merged_geotiffs", DL.id + "_" + DL.date + ".tif"))
         DL.merge_tiles(directory=os.path.join(base_path, "data", "unmerged_geotiffs"), mode="images")
         predict_with_smooth_blending()
         # merge predicted masks into one file
-        DL.merge_tiles(directory=os.path.join(base_path, "data", "predicted_unet"), mode="masks")
+        DL.merge_tiles(directory=os.path.join(base_path, "data", "predicted_patches"), mode="masks")
         script = os.path.join(base_path, "acolite_api", "fmask_script.py")
         subprocess.call([sys.executable, script])
         DL.merge_tiles(directory=os.path.join(base_path, "data", "merged_geotiffs"), mode="clouds")
@@ -238,17 +291,17 @@ if __name__ == "__main__":
         DL.merge_tiles(directory=os.path.join(base_path, "data", "unmerged_geotiffs"), mode="images")
 
     if args.command == "predict":
-        DL = DatasetLoader(date=args.date[0], id=args.id[0], crs=get_crs().split(":")[1])
+        DL = DatasetLoader(date=args.date[0], id=args.tile[0], crs=str(get_crs()))
+        # patch full ROI for predictions
+        DL.patch_large_image(os.path.join(base_path, "data", "merged_geotiffs", DL.id + "_" + DL.date + ".tif"))
         predict_with_smooth_blending()
         # merge predicted masks into one file
-        DL.merge_tiles(directory=os.path.join(base_path, "data", "predicted_unet"), mode="masks")
+        DL.merge_tiles(directory=os.path.join(base_path, "data", "predicted_patches"), mode="masks")
 
     if args.command == "fmask":
         DL = DatasetLoader(date=args.date[0], id=args.tile[0])
         script = os.path.join(base_path, "acolite_api", "fmask_script.py")
         run_fmask()
-        # subprocess.call([sys.executable,  script], shell=True)
-        # DL.merge_tiles(directory=os.path.join(base_path, "data", "non_water_mask"), mode="clouds")
         poly = read_geojson(os.path.join(base_path, "poly.geojson"))
         print(str(get_crs()))
         print(str(get_crs()).lower())
@@ -257,3 +310,17 @@ if __name__ == "__main__":
 
     if args.command == "clean":
         clean_directories(date=args.date[0])
+
+    if args.command == "test":
+        DL = DatasetLoader(date="20210918", id="T16PCC", crs="32616")
+        # DL.patch_small_image(os.path.join(base_path, "data", "merged_geotiffs", DL.id + "_" + DL.date + ".tif"))
+        resnet()
+
+        # merge predicted masks into one file
+        DL.merge_tiles(directory=os.path.join(base_path, "data", "predicted_patches"), mode="masks")
+        script = os.path.join(base_path, "acolite_api", "fmask_script.py")
+        subprocess.call([sys.executable, script])
+        DL.merge_tiles(directory=os.path.join(base_path, "data", "merged_geotiffs"), mode="clouds")
+        poly = read_geojson(os.path.join(base_path, "poly.geojson"))
+        DL.crop_non_water_mask(poly, crs="epsg:" + str(get_crs()))
+        DL.mask_predictions()

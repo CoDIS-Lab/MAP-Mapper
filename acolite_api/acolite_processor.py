@@ -1,8 +1,8 @@
 import sys, os
-from paths import base_path
+from utils.paths import base_path
 sys.path.insert(0, os.path.join(base_path, "acolite-main"))
 import acolite as ac
-from paths import base_path
+from utils.paths import base_path
 
 
 def acolite_loader(bundle):

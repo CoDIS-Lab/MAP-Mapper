@@ -1,8 +1,7 @@
 import os
-from paths import base_path
+from utils.paths import base_path
 from fmask.cmdline import sentinel2Stacked
 from multiprocessing import Pool
-import rasterio
 
 os.environ['PROJ_LIB'] = '/home/henry/PycharmProjects/plastic_pipeline/plastic_proj/lib/python3.8/site-packages/pyproj/proj_dir/share/proj'
 #os.environ['GDAL_DATA'] = '/home/henry/anaconda3/envs/marida/share/gdal'
@@ -36,7 +35,7 @@ def run_fmask():
     for safe_file in safe_files:
         safe_file_path = os.path.join(path, safe_file)
         tile_id = safe_file.split("_")[-2]
-        date = safe_file.split("_")[-1][:8]
+        date = safe_file.split("_")[2][:8]
         out_img_file = f'{tile_id}_{date}_cloud.tif'
         out_dir = os.path.join(base_path, "data", "merged_geotiffs", out_img_file)
         sentinel2Stacked.mainRoutine(

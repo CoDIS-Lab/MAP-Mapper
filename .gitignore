@@ -10,3 +10,6 @@
 /acolite_api/fmask_temp
 /plastic_proj
 *.kml
+*.pyc
+*pth
+*shp

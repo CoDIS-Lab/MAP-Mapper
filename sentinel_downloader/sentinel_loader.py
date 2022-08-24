@@ -3,7 +3,8 @@ from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
 import os
 import zipfile
 from dotenv import load_dotenv
-from paths import base_path
+from utils.paths import base_path
+from datetime import datetime
 load_dotenv()
 
 user_name = os.environ.get('USER_NAME')
@@ -48,14 +49,20 @@ class SentinelLoader(object):
             tile_id = value["title"].split("_")[-2]
             # product discriminator should be the same for any tiles with multiple datatakes, excluding the last 6
             # numbers indicating time of generation product
-            product_discriminator = value["title"].split("_")[-1]
+            product_discriminator = value["title"].split("_")[-1].replace("T", "")
+
+            datetime_object = datetime.strptime(product_discriminator, '%Y%m%d%H%M%S')
+
             try:
                 # delete oldest product of the tile
-                if product_dict[tile_id] > product_discriminator:
+                if datetime_object != product_dict[tile_id]:
                     del self_products_copy[product]
+
             except KeyError:
-                product_dict[tile_id] = product_discriminator
+                product_dict[tile_id] = datetime_object
         self.products = self_products_copy
+
+
 
     # download all products
     # consider a path_filter for some bands?

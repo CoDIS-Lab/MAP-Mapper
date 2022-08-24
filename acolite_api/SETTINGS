@@ -4,7 +4,7 @@ output=/home/henry/Documents/Sat_Data/processed
 # dsf algorithm
 aerosol_correction=dark_spectrum
 
-dsf_exclude_bands=B9, B10
+dsf_exclude_bands=B1, B2, B3, B5, B7, B8A, B9, B10, B12
 
 
 # ROI

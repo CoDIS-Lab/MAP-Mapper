@@ -1,19 +1,17 @@
 import os
 import shutil
 
-from paths import base_path
+from utils.paths import base_path
 
 
 def setup_directories():
     data_path = os.path.join(base_path, "data")
 
-    clean_dir(os.path.join(data_path, "large_patches"))
+    clean_dir(os.path.join(data_path, "patches"))
 
-    clean_dir(os.path.join(data_path, "predicted_unet"))
+    clean_dir(os.path.join(data_path, "predicted_patches"))
 
     clean_dir(os.path.join(data_path, "processed"))
-
-    clean_dir(os.path.join(data_path, "non_water_mask"))
 
     delete_dir(os.path.join(data_path, "unprocessed"))
 
@@ -44,23 +42,24 @@ def delete_dir(directory):
 def clean_directories(date):
     data_path = os.path.join(base_path, "data")
 
-    clean_dir(os.path.join(data_path, "large_patches"))
+    clean_dir(os.path.join(data_path, "patches"))
 
-    clean_dir(os.path.join(data_path, "predicted_unet"))
+    clean_dir(os.path.join(data_path, "predicted_patches"))
 
     clean_dir(os.path.join(data_path, "processed"))
-
-    clean_dir(os.path.join(data_path, "non_water_mask"))
 
     delete_dir(os.path.join(data_path, "unprocessed"))
 
     clean_dir(os.path.join(data_path, "unmerged_geotiffs"))
 
     parent_dir = os.path.join(data_path, "historic_files")
-    directory = date
-    historic_path = os.path.join(parent_dir, directory)
+    historic_path = os.path.join(parent_dir,  date)
     if not os.path.exists(historic_path):
         os.mkdir(historic_path)
     tiff_path = os.path.join(data_path, "merged_geotiffs")
+    # only keep geotiff and final predictions
     for f in os.listdir(tiff_path):
-        shutil.move(os.path.join(tiff_path, f), os.path.join(historic_path, f))
+        if f.endswith(date+".tif") or f.endswith("prediction.tif"):
+            shutil.move(os.path.join(tiff_path, f), os.path.join(historic_path, f))
+        else:
+            os.remove(os.path.join(tiff_path, f))

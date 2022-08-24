@@ -6,16 +6,15 @@ import rasterio
 import numpy as np
 from os.path import dirname as up
 import torch
-import torchvision.transforms as transforms
 from semantic_segmentation.Unet import UNet
-from paths import base_path
-from smooth_patches.smooth_tiled_predictions import predict_img_with_smooth_windowing
+from utils.paths import base_path
+from semantic_segmentation.smooth_patches.smooth_tiled_predictions import predict_img_with_smooth_windowing
+import torchvision.transforms as transforms
 
-bands_std = np.array([0.04725893, 0.04743808, 0.04699043, 0.04967381, 0.04946782, 0.06458357,
-                      0.07594915, 0.07120246, 0.08251058, 0.05111466, 0.03524419]).astype('float32')
+bands_mean = np.array(np.array([0.03163572, 0.03457443, 0.03436435, 0.02358126]).astype('float32'))
 
-bands_mean = np.array([0.05197577, 0.04783991, 0.04056812, 0.03163572, 0.02972606, 0.03457443,
-                       0.03875053, 0.03436435, 0.0392113, 0.02358126, 0.01588816]).astype('float32')
+bands_std = np.array([0.04967381, 0.06458357, 0.07120246, 0.05111466]).astype('float32')
+
 
 sys.path.append(os.path.join(up(up(up(os.path.abspath(__file__)))), 'utils'))
 
@@ -38,11 +37,10 @@ def predict(model, image):
 def predict_with_smooth_blending():
     print("making smoothly blended predictions....")
 
-    options = {"input_channels": 11,
-               "output_channels": 11,
-               "hidden_channels": 16,
+    options = {"input_channels": 4,
+               "output_channels": 2,
                "model_path": os.path.join(base_path, 'semantic_segmentation', 'unet', 'trained_models', 'model.pth'),
-               "gen_masks_path": os.path.join(base_path, 'data', 'predicted_unet')}
+               "gen_masks_path": os.path.join(base_path, 'data', 'predicted_patches')}
 
     transform_test = transforms.Compose([transforms.ToTensor()])
     standardization = transforms.Normalize(bands_mean, bands_std)
@@ -53,9 +51,8 @@ def predict_with_smooth_blending():
     else:
         device = torch.device("cpu")
 
-    model = UNet(input_bands=options['input_channels'],
-                 output_classes=options['output_channels'],
-                 hidden_channels=options['hidden_channels'])
+    model = UNet(in_channels=options['input_channels'],
+                 out_channels=options['output_channels'],)
 
     model.to(device)
 
@@ -67,7 +64,7 @@ def predict_with_smooth_blending():
         torch.cuda.empty_cache()
 
     model.eval()
-    patch_path = os.path.join(base_path, "data", "large_patches")
+    patch_path = os.path.join(base_path, "data", "patches")
     for file in os.listdir(patch_path):
         print("predictions on " + file)
         with rasterio.open(os.path.join(patch_path, file)) as src:
@@ -83,15 +80,18 @@ def predict_with_smooth_blending():
             with torch.no_grad():
                 predictions_smooth = predict_img_with_smooth_windowing(
                     input_img,
-                    window_size=256,
+                    window_size=32,
                     subdivisions=2,  # Minimal amount of overlap for windowing. Must be an even number.
-                    nb_classes=11,
+                    nb_classes=2,
                     model=model,
                     pred_func=lambda img_batch_subdiv: predict(model, torch.from_numpy(img_batch_subdiv))
                 )
                 # makes nan values max value in cloud channel
-                # nan values are classified as cloud (ignored in final analysis)
-                numpy.nan_to_num(predictions_smooth[:, :, 5], copy=False, nan=99)
+                # nan values are classified as cloud (ignored in final analysis) #not MD
+                numpy.nan_to_num(predictions_smooth[:, :, 1], copy=False, nan=99)
+                threshold = 0.995
+                MD = predictions_smooth[:, :, 0]
+                MD[MD < threshold] = 0
                 # uses the maximum value of the predictions channels to classify each pixel,
                 argmax = np.nanargmax(predictions_smooth, axis=2)
                 # increase each value of prediction mask by 1 (0 - 10 becomes 1 - 11)
@@ -106,6 +106,6 @@ def predict_with_smooth_blending():
                      "dtype": "uint8",
                      "nodata": 255})
                 with rasterio.open(
-                        os.path.join(base_path, "data", "predicted_unet", file.strip(".tif") + "_predict.tif"), "w",
+                        os.path.join(base_path, "data", "predicted_patches", file.strip(".tif") + "_predict.tif"), "w",
                         **out_meta) as dst:
                     dst.write(final_prediction)
