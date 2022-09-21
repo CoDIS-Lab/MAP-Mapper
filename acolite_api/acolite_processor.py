@@ -1,11 +1,10 @@
 import sys, os
-from utils.paths import base_path
+from utils.dir_management import base_path
 sys.path.insert(0, os.path.join(base_path, "acolite-main"))
 import acolite as ac
-from utils.paths import base_path
 
 
-def acolite_loader(bundle):
+def run_acolite(bundle):
     # scenes to process
     # output directory
     odir = os.path.join(base_path, "data", "processed")

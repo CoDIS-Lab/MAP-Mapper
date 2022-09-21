@@ -3,8 +3,8 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/acolite-main" isTestSource="false" />
     </content>
-    <content url="file://$MODULE_DIR$/acolite-main" />
     <orderEntry type="jdk" jdkName="Python 3.8 (plastic_pipeline)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

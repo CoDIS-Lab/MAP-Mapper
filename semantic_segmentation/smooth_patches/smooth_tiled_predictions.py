@@ -1,14 +1,4 @@
-
-
-# https://youtu.be/HrGn4uFrMOM
-"""MAKE SURE TO REFERENCE PROPERLY -THIS IS NOT SUFFIECIENT AS YOU MUST REFERENCE DIGITAL SREENI"""
-import torch
-
 """
-Original code is from the following source. It comes with MIT License so please mention
-the original reference when sharing.
-The original code has been modified to fix a couple of bugs and chunks of code
-unnecessary for smooth tiling are removed.
 # MIT License
 # Copyright (c) 2017 Vooban Inc.
 # Coded by: Guillaume Chevalier
@@ -17,7 +7,6 @@ unnecessary for smooth tiling are removed.
 #     https://github.com/Vooban/Smoothly-Blend-Image-Patches/blob/master/LICENSE
 """
 """Perform smooth predictions on an image from tiled prediction patches."""
-
 
 import numpy as np
 import scipy.signal
@@ -275,3 +264,7 @@ def predict_img_with_smooth_windowing(input_img, window_size, subdivisions, nb_c
         plt.title("Smoothly Merged Patches that were Tiled Tighter")
         plt.show()
     return prd
+
+""" 
+#End of referenced code
+"""

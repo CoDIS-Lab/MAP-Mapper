@@ -2,62 +2,122 @@
 import rasterio
 import numpy as np
 import os
-from utils.paths import base_path
+
+from utils.dir_management import get_predictions, base_path
 from pyproj import Transformer
-
-data_path = os.path.join(base_path, "data", "historic_files")
-
-
-def get_predictions():
-    density_files = []
-    for (root, dirs, files) in os.walk(data_path, topdown=True):
-        for f in files:
-            if "prediction" in f:
-                file_path = os.path.join(root, f)
-                density_files.append(file_path)
-    return density_files
+import plotly.figure_factory as ff
+import pandas as pd
 
 
-def get_debris_coords(image_path):
-    src = rasterio.open(image_path)
-    image = src.read(1)
-    debris_pixel_coords = np.argwhere(image == 1)
-    return debris_pixel_coords
-
-
-def get_plastic_points(image_path):
-    src = rasterio.open(image_path)
-    image = src.read(1)
-    debris_pixels = np.argwhere(image == 1)
-    return debris_pixels
-
-
-all_point_data = []
-
-for file in get_predictions():
-    plastic_pixels = get_plastic_points(file)
+# gets all EPSG:4326 coordinates from a prediction mask where plastic has been classified
+def generate_plastic_coordinates(file, date):
     src = rasterio.open(file)
-    image = src.read(1)
     meta = src.meta
+    image = src.read(1)
+    plastic_pixels = np.argwhere(image == 1)
+    # transform numpy coordinates to geo-coordinates
     geo_coords = [rasterio.transform.xy(meta['transform'], coord[0], coord[1], offset='center') for coord in plastic_pixels]
     transformer = Transformer.from_crs(src.crs, "epsg:4326")
     coords = [transformer.transform(coord[0], coord[1]) for coord in geo_coords]
-    all_point_data.extend(coords)
+    dated_coords = []
+    for coord in coords:
+        dated_coord = list(coord)
+        dated_coord.append(date)
+        dated_coords.append(dated_coord)
+    return dated_coords
 
-import plotly.figure_factory as ff
 
-import pandas as pd
-df = pd.DataFrame(all_point_data, columns =['centroid_lat', 'centroid_lon'])
-df.to_csv(os.path.join(data_path, "hond"))
-if not df.empty:
-    fig = ff.create_hexbin_mapbox(
-        data_frame=df, lat="centroid_lat", lon="centroid_lon",
-        nx_hexagon=15, opacity=0.6, labels={"color": "Point Count"},
-        show_original_data=True,
-        original_data_marker=dict(size=5, opacity=0.3, color="deeppink"),
-        color_continuous_scale="Thermal", min_count=0,
+# code to find and plot all suspected plastic on a map
+def plot_data(tag, data_path):
+    all_point_data = []
+    for file in sorted(get_predictions(data_path, tag)):
+        date = os.path.basename(file).split("_")[1]
+        all_point_data.extend(generate_plastic_coordinates(file, date))
 
-    )
-    fig.update_layout(mapbox_style="open-street-map", margin=dict(b=0, t=0, l=0, r=0))
+    df = pd.DataFrame(all_point_data, columns =['centroid_lat', 'centroid_lon', 'date'])
+    if not df.empty:
+        fig = ff.create_hexbin_mapbox(
+            data_frame=df, lat="centroid_lat", lon="centroid_lon",
+            nx_hexagon=30, opacity=0.6, labels={"color": "Point Count"},
+            show_original_data=True,
+            original_data_marker=dict(size=3, opacity=0.0, color="deeppink"),
+            color_continuous_scale="Reds", min_count=6,
 
-    fig.show()
+        )
+        fig.update_layout(mapbox_style="open-street-map", margin=dict(b=0, t=0, l=0, r=0))
+        fig.show()
+
+
+def save_coordinates_to_csv(data_path, tag):
+    all_point_data = []
+    for file in sorted(get_predictions(data_path, tag)):
+        date = os.path.basename(file).split("_")[1]
+        all_point_data.extend(generate_plastic_coordinates(file, date))
+    df = pd.DataFrame(all_point_data, columns=['centroid_lat', 'centroid_lon', 'date'])
+    if os.path.exists(os.path.join(base_path, "data", "outputs", "plastic_coordinates.csv")):
+        df.to_csv(os.path.join(base_path, "data", "outputs", "plastic_coordinates.csv"), mode="a", header=False)
+    else:
+        df.to_csv(os.path.join(base_path, "data", "outputs", "plastic_coordinates.csv"), mode="w", header=True)
+
+
+def plot_data_single_day(date):
+    df = pd.read_csv(os.path.join(base_path, "data", "outputs", "plastic_coordinates.csv"))
+    if not df.empty:
+        is_date = df['date'] == int(date)
+        df = df[is_date]
+        fig = ff.create_hexbin_mapbox(
+            title="Plastic Detections for " + date,
+            data_frame=df, lat="centroid_lat", lon="centroid_lon",
+            nx_hexagon=12, opacity=0.6, labels={"color": "Point Count"},
+            show_original_data=True,
+            original_data_marker=dict(size=3, opacity=0.3, color="deeppink"),
+            color_continuous_scale="Reds", min_count=0,
+        )
+        fig.update_layout(mapbox_style="open-street-map", margin=dict(b=0, t=40, l=0, r=0))
+        fig.show()
+    else:
+        print("no detections for " + date + " skipping plot...")
+
+if __name__ == "__main__":
+   # data_path = os.path.join(base_path, "data", "outputs")
+    #data_path = os.path.join("/home/henry/Desktop/dissertation_data", "HawaiiBigIslandSouth", "outputs")
+   # plot_data("prediction_masked", data_path)
+    plot_data_single_day("20220919")
+
+
+## This code was used to threshold probabilities and plot the new predictions.
+## This removes the need to generate new prediction masks for each threshold before plotting. However
+# def generate_threshold_coords(file):
+#     src = rasterio.open(file)
+#     meta = src.meta
+#     image = src.read(1)
+#     threshold = 0.99
+#     # ignore all
+#     image[image > 1] = np.nan
+#     plastic_pixels = np.argwhere(image > threshold)
+#     # transform numpy coordinates to geo-coordinates
+#     geo_coords = [rasterio.transform.xy(meta['transform'], coord[0], coord[1], offset='center') for coord in
+#                   plastic_pixels]
+#     transformer = Transformer.from_crs(src.crs, "epsg:4326")
+#     coords = [transformer.transform(coord[0], coord[1]) for coord in geo_coords]
+#     return coords
+#
+#
+# def plot_probabilities():
+#     all_point_data = []
+#     for file in sorted(get_probabilities(data_path)):
+#         all_point_data.extend(generate_threshold_coords(file))
+#
+#     df = pd.DataFrame(all_point_data, columns =['centroid_lat', 'centroid_lon'])
+#     if not df.empty:
+#         fig = ff.create_hexbin_mapbox(
+#             data_frame=df, lat="centroid_lat", lon="centroid_lon",
+#             nx_hexagon=8, opacity=0.6, labels={"color": "Point Count"},
+#             show_original_data=True,
+#             original_data_marker=dict(size=3, opacity=0.3, color="deeppink"),
+#             color_continuous_scale="Reds", min_count=0,
+#
+#         )
+#         fig.update_layout(mapbox_style="open-street-map", margin=dict(b=0, t=0, l=0, r=0))
+#         fig.show()
+# #

@@ -1,18 +1,18 @@
 import os
 import sys
 import random
-import numpy
 import rasterio
 import numpy as np
 from os.path import dirname as up
 import torch
 from semantic_segmentation.Unet import UNet
-from utils.paths import base_path
+from utils.dir_management import base_path
+import copy
 from semantic_segmentation.smooth_patches.smooth_tiled_predictions import predict_img_with_smooth_windowing
 import torchvision.transforms as transforms
 
+# for bands 4, 6, 8, 11
 bands_mean = np.array(np.array([0.03163572, 0.03457443, 0.03436435, 0.02358126]).astype('float32'))
-
 bands_std = np.array([0.04967381, 0.06458357, 0.07120246, 0.05111466]).astype('float32')
 
 
@@ -23,9 +23,9 @@ np.random.seed(0)
 torch.manual_seed(0)
 
 
-# prepare subdiv for model predictions
-def image_to_neural_input(subdiv):
-    return torch.movedim(torch.from_numpy(subdiv), (0, 3, 1, 2), (0, 1, 2, 3))
+# # prepare subdiv for model predictions
+# def image_to_neural_input(subdiv):
+#     return torch.movedim(torch.from_numpy(subdiv), (0, 3, 1, 2), (0, 1, 2, 3))
 
 
 def predict(model, image):
@@ -34,7 +34,7 @@ def predict(model, image):
     return np.moveaxis(probs, (0, 3, 1, 2), (0, 1, 2, 3))
 
 
-def predict_with_smooth_blending():
+def create_image_prediction():
     print("making smoothly blended predictions....")
 
     options = {"input_channels": 4,
@@ -51,8 +51,8 @@ def predict_with_smooth_blending():
     else:
         device = torch.device("cpu")
 
-    model = UNet(in_channels=options['input_channels'],
-                 out_channels=options['output_channels'],)
+    model = UNet(input_bands=options['input_channels'],
+                 output_classes=options['output_channels'],)
 
     model.to(device)
 
@@ -88,24 +88,23 @@ def predict_with_smooth_blending():
                 )
                 # makes nan values max value in cloud channel
                 # nan values are classified as cloud (ignored in final analysis) #not MD
-                numpy.nan_to_num(predictions_smooth[:, :, 1], copy=False, nan=99)
-                threshold = 0.995
-                MD = predictions_smooth[:, :, 0]
-                MD[MD < threshold] = 0
-                # uses the maximum value of the predictions channels to classify each pixel,
-                argmax = np.nanargmax(predictions_smooth, axis=2)
-                # increase each value of prediction mask by 1 (0 - 10 becomes 1 - 11)
-                argmax = argmax + 1
-                final_prediction = np.expand_dims(argmax, axis=0)
-                final_prediction = final_prediction.astype(np.uint8)
 
-                out_meta.update(
-                    {"height": final_prediction.shape[1],
-                     "width": final_prediction.shape[2],
+                probs = copy.deepcopy(predictions_smooth)
+                probs = probs[:, :, 0]
+                probs = np.expand_dims(probs, axis=0)
+
+                out_meta_probs = out_meta
+
+                out_meta_probs.update(
+                    {"height": probs.shape[1],
+                     "width": probs.shape[2],
                      "count": 1,
-                     "dtype": "uint8",
-                     "nodata": 255})
+                     "dtype": "float32",
+                     "nodata": 99})
+
                 with rasterio.open(
-                        os.path.join(base_path, "data", "predicted_patches", file.strip(".tif") + "_predict.tif"), "w",
-                        **out_meta) as dst:
-                    dst.write(final_prediction)
+                        os.path.join(base_path, "data", "predicted_patches", file.strip(".tif") + "_probs.tif"), "w",
+                        **out_meta_probs) as dst:
+                    dst.write(probs)
+
+
