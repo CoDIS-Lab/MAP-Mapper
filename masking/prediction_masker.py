@@ -8,10 +8,10 @@ import geopandas as gpd
 from shapely.geometry import Polygon
 import geojson
 import os
-from utils.dir_management import get_predictions, base_path
+from utils.dir_management import get_files, base_path
 from utils.geographic_utils import project_wsg_shape_to_crs, transform_raster
 
-data_path = os.path.join(base_path, "data", "outputs")
+
 
 
 # this crops f-mask output mask to the ROI
@@ -117,7 +117,7 @@ def mask_prediction(id, date, land_mask=True, cloud_mask=True):
 
 # applys thresholding to model output probabilities GeoTiff to produce binary prediction mask.
 def apply_threshold(dir, threshold):
-    prob_files = get_predictions(dir, "probabilities")
+    prob_files = get_files(dir, "probabilities")
     for file in prob_files:
         src = rasterio.open(file)
         meta = src.meta
@@ -178,6 +178,7 @@ def mask_many_predictions(dir, tag,  land_mask, cloud_mask):
 
 if __name__ == "__main__":
     print("running as main")
+    # data_path = os.path.join(base_path, "data", "outputs")
     # data_path = os.path.join("/home/henry/Desktop/dissertation_data", "cornwall", "outputs")
     # data_path = os.path.join("/home/henry/Desktop/dissertation_data", "plasticlitterproject", "20210706_")
     # apply_threshold(data_path, 0.99)

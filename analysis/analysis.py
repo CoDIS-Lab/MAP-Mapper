@@ -3,7 +3,7 @@ import rasterio
 import numpy as np
 import os
 
-from utils.dir_management import get_predictions, base_path
+from utils.dir_management import get_files, base_path
 from pyproj import Transformer
 import plotly.figure_factory as ff
 import pandas as pd
@@ -30,7 +30,7 @@ def generate_plastic_coordinates(file, date):
 # code to find and plot all suspected plastic on a map
 def plot_data(tag, data_path):
     all_point_data = []
-    for file in sorted(get_predictions(data_path, tag)):
+    for file in sorted(get_files(data_path, tag)):
         date = os.path.basename(file).split("_")[1]
         all_point_data.extend(generate_plastic_coordinates(file, date))
 
@@ -50,7 +50,7 @@ def plot_data(tag, data_path):
 
 def save_coordinates_to_csv(data_path, tag):
     all_point_data = []
-    for file in sorted(get_predictions(data_path, tag)):
+    for file in sorted(get_files(data_path, tag)):
         date = os.path.basename(file).split("_")[1]
         all_point_data.extend(generate_plastic_coordinates(file, date))
     df = pd.DataFrame(all_point_data, columns=['centroid_lat', 'centroid_lon', 'date'])

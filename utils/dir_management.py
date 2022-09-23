@@ -76,7 +76,7 @@ def unzip_files(files, path):
 
 
 # gets all prediction files from directory
-def get_predictions(path, tag):
+def get_files(path, tag):
     density_files = []
     for (root, dirs, files) in os.walk(path, topdown=True):
         for f in files:
