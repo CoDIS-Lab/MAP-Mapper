@@ -1,4 +1,8 @@
+![BOH-0 5opacity3size0 99](https://user-images.githubusercontent.com/89064748/198129585-ca0e742e-4203-4897-a77c-488ec78e8654.png)
+
+
 <h1> MAP-Mapper – User Guide </h1>
+
 
 <h2> About </h2>
 <p>Marine Plastic Mapper (MAP-Mapper) is a tool for assessing marine macro-plastic density to identify plastic hotspots, It is designed as a complete pipeline for downloading, processing and plotting suspected plastic detections and is underpinned by the MARIDA dataset.
