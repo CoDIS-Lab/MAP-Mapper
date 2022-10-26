@@ -1,5 +1,4 @@
 import sys
-
 from analysis.analysis import save_coordinates_to_csv, plot_data_single_day, plot_data
 from fmask_api.f_mask import run_fmask
 from masking.prediction_masker import mask_prediction, crop_f_mask, apply_threshold
@@ -15,7 +14,7 @@ import os
 from sentinelsat import read_geojson
 from image_engineer.image_engineering import ImageEngineer
 from utils.geographic_utils import get_crs
-from utils.dir_management import setup_directories, clean_directories, base_path
+from utils.dir_management import setup_directories, clean_directories, base_path, get_files
 from datetime import datetime, timedelta
 import pandas as pd
 from semantic_segmentation.debris_predictor import create_image_prediction
@@ -25,19 +24,22 @@ from dotenv import load_dotenv
 from acolite_api.acolite_processor import run_acolite
 
 load_dotenv()
+os.environ['PROJ_LIB'] = '/home/henry/anaconda3/envs/map-mapper/share/proj'
+os.environ['PROJ_DEBUG'] = "3"
 
 # code for command line interface
 if __name__ == "__main__":
+
+    # set variables for downloading Sentinel-2 data
     today = datetime.today().strftime("%Y%m%d")
     tomorrow = (datetime.today() + timedelta(days=1)).strftime("%Y%m%d")
 
+    # create argument parser for CLI
     parser = argparse.ArgumentParser(description='A sentinel-2 plastic detection pipeline using the MARIDA dataset')
-
     subparsers = parser.add_subparsers(help='possible uses', dest='command')
-    test = subparsers.add_parser('test', help='test')
-    pipeline = subparsers.add_parser('full', help='run full pipeline for a given ROI')
 
-    # full pipeline arguments
+    # FULL MAP-MAPPER PIPELINE
+    pipeline = subparsers.add_parser('full', help='run full pipeline for a given ROI')
     pipeline.add_argument(
         '-start_date',
         nargs=1,
@@ -101,7 +103,9 @@ if __name__ == "__main__":
         dest="land_mask"
     )
 
-    # partial pipeline components
+    # PIPELINE COMPONENTS - FOR CALLING INDIVIDUAL PARTS OF THE PIPELINE
+
+    # download sentinel-2 data
     download = subparsers.add_parser(
         'download',
         help='download sentinel-2 data'
@@ -117,16 +121,16 @@ if __name__ == "__main__":
         '-cloud_percentage',
         nargs=1,
         type=str,
-        default=[50],
+        default=[20],
         dest='cloud_percentage',
         help='use with --download to specify the date for data download'
     )
-
-    # run fmask
-    download = subparsers.add_parser(
+    # run fmask on Sentinel-2 data
+    fmask = subparsers.add_parser(
         'fmask',
         help='generate f-mask from sentinel-2 data'
     )
+    # run acolite on Sentinel-2 data
     acolite = subparsers.add_parser(
         "acolite",
         help='complete acolite processing on SAFE files'
@@ -146,7 +150,7 @@ if __name__ == "__main__":
         help='Tile ID',
         dest="tile_id"
     )
-
+    # Merge acolite outputs into multi-banded geotiff
     combine_acolite = subparsers.add_parser(
         'combine_acolite',
         help='download sentinel-2 data'
@@ -167,11 +171,11 @@ if __name__ == "__main__":
         help='complete acolite processing on SAFE files',
         dest="tile_id"
     )
+    # make model predictions on multi-banded geotiff
     predict = subparsers.add_parser(
         'predict',
         help='make predictions on pre-existing geotiff'
     )
-
     predict.add_argument(
         '-date',
         nargs=1,
@@ -180,7 +184,6 @@ if __name__ == "__main__":
         help='complete acolite processing on SAFE files',
         dest="date"
     )
-
     predict.add_argument(
         '-tile_id',
         nargs=1,
@@ -189,11 +192,11 @@ if __name__ == "__main__":
         help='complete acolite processing on SAFE files',
         dest="tile_id"
     )
+    # mask model predictions to reduce impact of cloud and land
     mask = subparsers.add_parser(
         'mask',
-        help='mask predictions using fmask for more robust cloud and land detection'
+        help='mask predictions using fmask and land-masking for more robust cloud and land detection'
     )
-
     mask.add_argument(
         '-date',
         nargs=1,
@@ -209,63 +212,35 @@ if __name__ == "__main__":
         help='Tile ID',
         dest="tile_id"
     )
-
     mask.add_argument(
         '-land_mask',
         action='store_true',
         help='mask land',
         dest="land_mask"
     )
-
     mask.add_argument(
         '-cloud_mask',
         action='store_true',
         help='mask land',
         dest="cloud_mask"
     )
-
     mask.add_argument(
         '-no_land_mask',
         action='store_false',
         help='false if no land in ROI',
         dest="land_mask"
     )
-
     clean = subparsers.add_parser(
         'clean',
         help='WARNING! Removes all data associated with sentinel downloads, '
              'processing and predictions in the "data" directory tree'
     )
-
-    predict_from_acolite = subparsers.add_parser('predict_from_acolite', help='run full pipeline for a given ROI')
-    predict_from_acolite.add_argument(
-        '-date',
-        nargs=1,
-        type=str,
-        default=[today],
-        help='complete acolite processing on SAFE files',
-        dest="date"
-    )
-
-    predict_from_acolite.add_argument(
-        '-tile_id',
-        nargs=1,
-        type=str,
-        default=None,
-        help='complete acolite processing on SAFE files',
-        dest="tile_id"
-    )
-    predict_from_acolite.add_argument(
-        '-crs',
-        nargs=1,
-        type=str,
-        default=None,
-        dest="crs"
-    )
+    # parse args
     args = parser.parse_args()
     options = vars(args)
-    print(options)
-
+    # print to terminal for easier manual verification
+    print("Running MAP-mapper with:" + str(options))
+    # CODE TO RUN THE FULL MAP_MAPPER PIPELINE
     if args.command == "full":
         # ensure date path has the required directories for processing and analysis
         setup_directories()
@@ -298,16 +273,23 @@ if __name__ == "__main__":
 
             # query SciHub and download SAFE files
             SentinelLoader(start_date=start_date, end_date=end_date, max_cloud_percentage=args.cloud_percentage, tile_id=args.tile_id, max_wind_speed=args.max_wind_speed).run()
+
             bundles = os.listdir(os.path.join(base_path, "data", "unprocessed"))
             print(bundles)
-            # if any data to process, run acolite
+
+            # if any data to process, run pipeline
             if bundles:
+                # set tile_id and date
+                tile_id = bundles[0].split("_")[-2]
+                print(tile_id)
+                date = bundles[0].split("_")[2][:8]
+                print(date)
+                # run acolite with multiprocessing
                 if __name__ == '__main__':
                     with Pool(len(bundles)) as p:
                         print(p.map(run_acolite, bundles))
                 print("processing files........")
-
-                image_engineer = ImageEngineer(date=start_date, land_mask=args.land_mask, cloud_mask=args.cloud_mask)
+                image_engineer = ImageEngineer(id=tile_id, date=start_date, land_mask=args.land_mask, cloud_mask=args.cloud_mask)
 
                 # get crs of SAFE file
                 image_engineer.crs = get_crs()
@@ -325,14 +307,12 @@ if __name__ == "__main__":
                 image_engineer.merge_tiles(directory=os.path.join(base_path, "data", "unmerged_geotiffs"), mode="images")
 
                 # patch full ROI for predictions
-                image_engineer.patch_image(os.path.join(base_path, "data", "merged_geotiffs",  image_engineer.id + "_" + image_engineer.date + ".tif"))
+                image_engineer.patch_image(os.path.join(base_path, "data", "merged_geotiffs",  tile_id + "_" + date + ".tif"))
 
                 # make predictions on image patches
                 create_image_prediction()
 
                 # merge predicted masks into one file
-                #ImageEngineer.merge_tiles(directory=os.path.join(base_path, "data", "predicted_patches"), mode="masks")
-
                 image_engineer.merge_tiles(directory=os.path.join(base_path, "data", "predicted_patches"), mode="probs")
 
                 # run f-mask on each sentinel SAFE file
@@ -341,26 +321,28 @@ if __name__ == "__main__":
                 # merge f-masks into one large mask
                 image_engineer.merge_tiles(directory=os.path.join(base_path, "data", "merged_geotiffs"), mode="clouds")
 
+                # set threshold (only pixels that the model predicts as having >99% chance of being plastic are classified as plastic
+                threshold = 0.99
                 # apply threshold
-                apply_threshold(os.path.join(base_path, "data", "merged_geotiffs"), 0.99)
+                apply_threshold(os.path.join(base_path, "data", "merged_geotiffs"), threshold)
 
                 # read coords for f-mask crop
                 poly = read_geojson(os.path.join(base_path, "poly.geojson"))
 
                 # crop f-mask for ROI
-                crop_f_mask(image_engineer.id, image_engineer.date, poly, image_engineer.crs)
+                crop_f_mask(tile_id, date, poly, image_engineer.crs)
 
                 # apply f-mask to predictions, generate and apply land-mask
                 mask_prediction(id=image_engineer.id, date=image_engineer.date, land_mask=image_engineer.land_mask, cloud_mask=image_engineer.cloud_mask)
 
-                # get plastic coordiantes and save to csv
+                # get plastic coordinates and save to csv
                 save_coordinates_to_csv(os.path.join(base_path, "data", "merged_geotiffs"), "prediction_masked")
 
-                # plot single date coordinates
-                plot_data_single_day(image_engineer.date)
+                # plot single date coordinates - Currently broken, plot data by specifying the output data_path in analysis.py
+                # plot_data_single_day(date)
 
                 # clean data dirs for next iteration, save predictions and tif to historic files dir
-                clean_directories(image_engineer.date)
+                clean_directories(date)
 
         # plot all plastic detections
         plot_data(os.path.join(base_path, "data", "outputs"), "prediction_masked")
@@ -390,7 +372,10 @@ if __name__ == "__main__":
 
     if args.command == "combine_acolite":
 
-        image_engineer = ImageEngineer(date=args.date[0], id=args.tile_id[0])
+        date = args.date[0]
+        tile_id = args.tile_id[0]
+
+        image_engineer = ImageEngineer(date=date, id=tile_id)
 
         # load processed acolite rhos images (assigns file path to self.tiff_files)
         image_engineer.load_images()
@@ -406,10 +391,13 @@ if __name__ == "__main__":
 
     if args.command == "predict":
 
-        image_engineer = image_engineer(date=args.date[0], id=args.tile_id[0], crs=get_crs())
+        date = args.date[0]
+        tile_id = args.tile_id[0]
+
+        image_engineer = ImageEngineer(date=date, id=tile_id, crs=get_crs())
         # patch full ROI for predictions
 
-        image_engineer.patch_image(os.path.join(base_path, "data", "merged_geotiffs",  image_engineer.id + "_" +  image_engineer.date + ".tif"))
+        image_engineer.patch_image(os.path.join(base_path, "data", "merged_geotiffs", tile_id + "_" + date + ".tif"))
 
         create_image_prediction()
 
@@ -418,7 +406,10 @@ if __name__ == "__main__":
 
     if args.command == "mask":
 
-        image_engineer = image_engineer(date=args.date[0], id=args.tile_id[0], land_mask=args.land_mask, cloud_mask=args.cloud_mask)
+        date = args.date[0]
+        tile_id = args.tile_id[0]
+
+        image_engineer = image_engineer(date=date, id=tile_id, land_mask=args.land_mask, cloud_mask=args.cloud_mask)
 
         # get crs from sentinel tile
         image_engineer.crs = get_crs()
@@ -427,10 +418,10 @@ if __name__ == "__main__":
         poly = read_geojson(os.path.join(base_path, "poly.geojson"))
 
         # crop f-mask for ROI
-        crop_f_mask(image_engineer.id,  image_engineer.date, poly, image_engineer.crs)
+        crop_f_mask(tile_id, date, poly, image_engineer.crs)
 
         # apply f-mask to predictions, generate and apply land-mask
-        mask_prediction(image_engineer.id, image_engineer.date, image_engineer.land_mask, image_engineer.cloud_mask)
+        mask_prediction(tile_id, date, image_engineer.land_mask, image_engineer.cloud_mask)
 
     if args.command == "clean":
         clean_directories(date=args.date[0])

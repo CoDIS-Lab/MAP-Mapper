@@ -2,9 +2,6 @@ from fmask.cmdline import sentinel2Stacked
 import os
 from utils.dir_management import base_path
 
-os.environ['PROJ_LIB'] = '/home/henry/PycharmProjects/plastic_pipeline/plastic_proj/lib/python3.8/site-packages/pyproj/proj_dir/share/proj'
-os.environ['PROJ_DEBUG'] = "3"
-
 
 def run_fmask(path):
     safe_files = os.listdir(path)

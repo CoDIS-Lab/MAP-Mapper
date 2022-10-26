@@ -2,30 +2,25 @@ import os
 import shutil
 import zipfile
 
+
 # project directory
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+data_path = os.path.join(base_path, "data")
+data_dirs = ["merged_geotiffs", "outputs", "patches", "predicted_patches", "processed", "unmerged_geotiffs", "unprocessed"]
 
 def setup_directories():
-    data_path = os.path.join(base_path, "data")
-
-    clean_dir(os.path.join(data_path, "patches"))
-
-    clean_dir(os.path.join(data_path, "predicted_patches"))
-
-    clean_dir(os.path.join(data_path, "processed"))
-
-    delete_dir(os.path.join(data_path, "unprocessed"))
-
-    clean_dir(os.path.join(data_path, "unmerged_geotiffs"))
-
-    clean_dir(os.path.join(data_path, "merged_geotiffs"))
+    for dir in data_dirs:
+        os.makedirs(os.path.join(data_path, "data", dir), exist_ok=True)
+        if dir == "unprocessed":
+            delete_dir(os.path.join(data_path, "unprocessed"))
+        else:
+            clean_dir(os.path.join(data_path, dir))
 
 
 def clean_dir(directory):
-    for dirpath, _, filenames in os.walk(directory):
+    for dir_path, _, filenames in os.walk(directory):
         for f in filenames:
-            f_path = os.path.abspath(os.path.join(dirpath, f))
+            f_path = os.path.abspath(os.path.join(dir_path, f))
             os.remove(f_path)
 
 
@@ -43,28 +38,23 @@ def delete_dir(directory):
 
 def clean_directories(date):
     data_path = os.path.join(base_path, "data")
-
-    clean_dir(os.path.join(data_path, "patches"))
-
-    clean_dir(os.path.join(data_path, "predicted_patches"))
-
-    clean_dir(os.path.join(data_path, "processed"))
-
-    delete_dir(os.path.join(data_path, "unprocessed"))
-
-    clean_dir(os.path.join(data_path, "unmerged_geotiffs"))
+    for dir in data_dirs:
+        if dir == "unprocessed":
+            delete_dir(os.path.join(data_path, "unprocessed"))
+        else:
+            clean_dir(os.path.join(data_path, dir))
 
     parent_dir = os.path.join(data_path, "outputs")
-    historic_path = os.path.join(parent_dir,  date)
-    if not os.path.exists(historic_path):
-        os.mkdir(historic_path)
+    output_path = os.path.join(parent_dir,  date)
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
     tiff_path = os.path.join(data_path, "merged_geotiffs")
     # only keep geotiff and final predictions
     for f in os.listdir(tiff_path):
-        # if f.endswith(date+".tif") or f.endswith("prediction.tif"):
-        shutil.move(os.path.join(tiff_path, f), os.path.join(historic_path, f))
-    # else:
-    #     os.remove(os.path.join(tiff_path, f))
+        if f.endswith("cloud.tif"):
+            os.remove(os.path.join(tiff_path, f))
+        else:
+            shutil.move(os.path.join(tiff_path, f), os.path.join(output_path, f))
 
 
 def unzip_files(files, path):
@@ -77,11 +67,11 @@ def unzip_files(files, path):
 
 # gets all prediction files from directory
 def get_files(path, tag):
-    density_files = []
+    all_files = []
     for (root, dirs, files) in os.walk(path, topdown=True):
         for f in files:
             if tag in f:
                 file_path = os.path.join(root, f)
-                density_files.append(file_path)
-    return density_files
+                all_files.append(file_path)
+    return all_files
 

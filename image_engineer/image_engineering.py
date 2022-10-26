@@ -40,13 +40,6 @@ class ImageEngineer:
         # makes sure each band is in correct order for stacking (splits off band wavelength number,
         # removes ".tif", converts to int and sorts ascending)
         self.tif_files = sorted(self.tif_files, key=lambda x: int((x.rsplit("_", 1)[1][:-4])))
-
-        f_name_as_list = self.tif_files[0].split("_")
-        self.id = f_name_as_list[-4]
-        print("Set tile ID as " + self.id)
-        self.date = f_name_as_list[3] + f_name_as_list[4] + f_name_as_list[5]
-        print("Set date as " + self.date)
-
         if self.tif_files:
             print("AC files found: " + str(self.tif_files))
 
@@ -54,10 +47,6 @@ class ImageEngineer:
         print("Creating multi-banded tiff...")
         split_tiles = {}
         for f in self.tif_files:
-            # get tileid utilising file name format of the dataset. e.g(sensor_date_tileid_L2R_rhos_band.tif)
-            f_name_as_list = f.split("_")
-            self.id = f_name_as_list[-4]
-            self.date = f_name_as_list[3] + f_name_as_list[4] + f_name_as_list[5]
             try:
                 split_tiles[self.id + "_" + self.date].append(f)
             except KeyError:
@@ -79,94 +68,50 @@ class ImageEngineer:
         print("merging tiles... " + "mode: " + mode)
         src_files_to_mosaic = []
         # merge predictions
-        type = ""
+        tiff_dir = "merged_geotiffs"
         if mode == "masks":
-            tiff_files = [x for x in os.listdir(directory) if x.endswith("predict.tif")]
-            tile = tiff_files[0].split("_")
-            self.id = tile[0]
-            self.date = tile[-2].strip(".tif")
-            type = "_unet"
-            for fp in tiff_files:
-                if fp.endswith("predict.tif"):
-                    src = rasterio.open(os.path.join(directory, fp))
-                    src_files_to_mosaic.append(src)
-            mosaic, out_trans = merge(src_files_to_mosaic)
-            # select first image from merge_geotiffs directory (must be kept with only one image to work properly)
-            hyperspectral_geotiff = self.id + "_" + self.date + ".tif"
-            # date is last 8 chars, followed by .tif
-            with rasterio.open(os.path.join(base_path, "data", "merged_geotiffs", hyperspectral_geotiff), "r") as img:
-                out_meta = img.meta.copy()
-            out_meta.update({"driver": "GTiff",
-                             "count": 1,
-                             "nodata": 99,
-                             "dtype": "uint8",
-                             "height": mosaic.shape[1],
-                             "width": mosaic.shape[2],
-                             "transform": out_trans
-                             })
-
+            output_type = "unet"
+            suffix = "predict.tif"
         if mode == "probs":
-            tiff_files = [x for x in os.listdir(directory) if x.endswith("probs.tif")]
-            tile = tiff_files[0].split("_")
-            self.id = tile[0]
-            self.date = tile[-2].strip(".tif")
-            type = "_probabilities"
-            for fp in tiff_files:
-                if fp.endswith("probs.tif"):
-                    src = rasterio.open(os.path.join(directory, fp))
-                    src_files_to_mosaic.append(src)
-            mosaic, out_trans = merge(src_files_to_mosaic)
-            # select first image from merge_geotiffs directory (must be kept with only one image to work properly)
-            hyperspectral_geotiff = self.id + "_" + self.date + ".tif"
-            # date is last 8 chars, followed by .tif
-            with rasterio.open(os.path.join(base_path, "data", "merged_geotiffs", hyperspectral_geotiff), "r") as img:
-                out_meta = img.meta.copy()
-            out_meta.update({"driver": "GTiff",
-                             "count": 1,
-                             "nodata": 99,
-                             "height": mosaic.shape[1],
-                             "width": mosaic.shape[2],
-                             "transform": out_trans
-                             })
+            output_type = "probabilities"
+            suffix = "probs.tif"
+        if mode == "images":
+            output_type = ""
+            suffix = ".tif"
+            tiff_dir = "unmerged_geotiffs"
+        if mode == "clouds":
+            output_type = "cloud"
+            suffix = "cloud.tif"
+        tiff_files = [x for x in os.listdir(directory) if x.endswith(suffix)]
+        for fp in tiff_files:
+            src = rasterio.open(os.path.join(directory, fp))
+            src_files_to_mosaic.append(src)
+
+        mosaic, out_trans = merge(src_files_to_mosaic)
+        # select first image from merge_geotiffs directory (must be kept with only one image to work properly)
+        multi_banded_geotiff = self.id + "_" + self.date + ".tif"
+        # get meta from multi banded geotiff
+        with rasterio.open(os.path.join(base_path, "data", tiff_dir, multi_banded_geotiff), "r") as img:
+            out_meta = img.meta.copy()
+        out_meta.update({"driver": "GTiff",
+                         "count": 1,
+                         "nodata": 99,
+                         "dtype": "uint8",
+                         "height": mosaic.shape[1],
+                         "width": mosaic.shape[2],
+                         "transform": out_trans
+                         })
         # for merging all images into one image
         if mode == "images":
-            tiff_files = [x for x in os.listdir(directory) if x.endswith(".tif")]
-            tile = tiff_files[0].split("_")
-            self.id = tile[0]
-            self.date = tile[-1].strip(".tif")
-            for fp in tiff_files:
-                if fp.endswith(".tif"):
-                    src = rasterio.open(os.path.join(directory, fp))
-                    src_files_to_mosaic.append(src)
-            mosaic, out_trans = merge(src_files_to_mosaic)
             out_meta = src.meta.copy()
-            self.safe_trans = out_trans
             out_meta.update({"driver": "GTiff",
                              "height": mosaic.shape[1],
                              "width": mosaic.shape[2],
                              "transform": out_trans
                              })
-
-        if mode == "clouds":
-            # consider -load in meta date from safe file with eqch image, complete transform.. etc...
-            tiff_files = [x for x in os.listdir(directory
-                                                ) if x.endswith(".tif") and "cloud" in x]
-            # get tile id of first tile to use for reference
-            type = "_cloud"
-            self.date = tiff_files[0].split("_")[1]
-            self.id = tiff_files[0].split("_")[0]
-            for fp in tiff_files:
-                src = rasterio.open(os.path.join(directory, fp))
-                src_files_to_mosaic.append(src)
-
-            mosaic, out_trans = merge(src_files_to_mosaic)
-            out_meta = src.meta.copy()
-            out_meta.update({"driver": "GTiff",
-                             "height": mosaic.shape[1],
-                             "width": mosaic.shape[2],
-                             "transform": out_trans})
-
-        merged_tile = self.id + "_" + self.date + type
+        if output_type:
+            output_type = "_" + output_type
+        merged_tile = self.id + "_" + self.date + output_type
         merged_image_path = os.path.join(merged_path, merged_tile + ".tif")
         with rasterio.open(merged_image_path, "w", **out_meta) as dest:
             dest.write(mosaic)
@@ -195,15 +140,24 @@ class ImageEngineer:
             filename = input_filepath.split("/")[-1]
             tile = filename.split("_")[0]
             date = filename.split("_")[-1]
-            tile_width, tile_height = inds.width //8 , inds.height //8
+            # patch sizes are dependent on input image size
+            if inds.width > 8000 and inds.height > 8000:
+                tile_width, tile_height = inds.width // 16, inds.height // 16
+            elif inds.width > 4000 and inds.height > 4000:
+                tile_width, tile_height = inds.width // 8, inds.height // 8
+            elif inds.width > 2000 and inds.height > 2000:
+                tile_width, tile_height = inds.width // 4, inds.height // 4
+            elif inds.width > 1000 and inds.height > 1000:
+                tile_width, tile_height = inds.width // 2, inds.height // 2
+            else:
+                tile_width, tile_height = inds.width, inds.height
             meta = inds.meta.copy()
             for window, transform in self.get_tiles(inds, width=tile_width, height=tile_height):
                 print(window)
                 if window.width == tile_width and window.height == tile_height:
                     meta['transform'] = transform
                     meta['width'], meta['height'] = window.width, window.height
-                    outpath = os.path.join(out_path,
-                                           output_filename.format(tile, int(window.col_off), int(window.row_off), date))
+                    outpath = os.path.join(out_path, output_filename.format(tile, int(window.col_off), int(window.row_off), date))
                     with rasterio.open(outpath, 'w', **meta) as outds:
                         outds.write(inds.read(window=window))
                 else:

@@ -4,9 +4,8 @@ aerosol_correction=dark_spectrum
 
 dsf_exclude_bands=B9, B10
 
-
-# ROI
-polygon=/home/henry/PycharmProjects/plastic_pipeline/poly.geojson
+#ROI
+#this should be parsed in from acolite_processor.py
 
 # resolves issue with none type see this thread - https://odnature.naturalsciences.be/remsem/acolite-forum/viewtopic.php?t=319
 geometry_type=grids

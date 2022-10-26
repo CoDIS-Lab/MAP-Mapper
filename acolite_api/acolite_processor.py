@@ -16,6 +16,7 @@ def run_acolite(bundle):
     # set settings provided above
     settings['inputfile'] = os.path.join(base_path, "data", "unprocessed", bundle)
     settings['output'] = odir
+    settings['polygon'] = os.path.join(base_path, "poly.geojson")
 
     # process the current bundle
     ac.acolite.acolite_run(settings=settings)

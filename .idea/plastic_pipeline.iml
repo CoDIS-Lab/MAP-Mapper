@@ -5,7 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/acolite-main" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.8 (plastic_pipeline)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.10 (mapper)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
