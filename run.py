@@ -2,19 +2,22 @@ import sys
 from analysis.analysis import save_coordinates_to_csv, plot_data_single_day, plot_data
 from fmask_api.f_mask import run_fmask
 from masking.prediction_masker import mask_prediction, crop_f_mask, apply_threshold
+import os
+from utils.dir_management import setup_directories, clean_directories, base_path, get_files
 
-sys.path.insert(0, "/acolite_api")
-sys.path.insert(0, "/semantic_segmentation")
-sys.path.insert(0, "/sentinel_downloader")
-sys.path.insert(0, "/smooth_patches")
-sys.path.insert(0, "/acolite-main/acolite")
+sys.path.insert(0, os.path.join(base_path, "acolite-main"))
+sys.path.insert(0, os.path.join(base_path, "acolite_api"))
+sys.path.insert(0, os.path.join(base_path, "semantic_segmentation"))
+sys.path.insert(0, os.path.join(base_path, "sentinel_downloader"))
+sys.path.insert(0, os.path.join(base_path, "smooth_patches"))
+sys.path.insert(0, os.path.join(base_path, "acolite-main", "acolite"))
 
 import argparse
-import os
+
 from sentinelsat import read_geojson
 from image_engineer.image_engineering import ImageEngineer
 from utils.geographic_utils import get_crs
-from utils.dir_management import setup_directories, clean_directories, base_path, get_files
+
 from datetime import datetime, timedelta
 import pandas as pd
 from semantic_segmentation.debris_predictor import create_image_prediction
@@ -323,6 +326,7 @@ if __name__ == "__main__":
 
                 # set threshold (only pixels that the model predicts as having >99% chance of being plastic are classified as plastic
                 threshold = 0.99
+
                 # apply threshold
                 apply_threshold(os.path.join(base_path, "data", "merged_geotiffs"), threshold)
 

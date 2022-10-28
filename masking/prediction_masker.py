@@ -2,7 +2,6 @@ import numpy as np
 import shapely
 import rasterio.mask
 import shapefile
-
 import rasterio
 import geopandas as gpd
 from shapely.geometry import Polygon
@@ -95,6 +94,7 @@ def mask_prediction(id, date, land_mask=True, cloud_mask=True):
     prob_file = [x for x in os.listdir(os.path.join(base_path, "data", "merged_geotiffs")) if x.endswith("_probabilities.tif")][0]
     files_to_mask = [predict_file, prob_file]
     for file in files_to_mask:
+        # either prediction or probabilities
         suffix = file.split("_")[-1].strip(".tif")
         with rasterio.open(os.path.join(base_path, "data", "merged_geotiffs", file)) as model_output:
             img = model_output.read(1)
@@ -117,30 +117,6 @@ def mask_prediction(id, date, land_mask=True, cloud_mask=True):
             apply_land_mask(masked_prediction_file)
 
 
-def mask_probabilities(id, date, land_mask=True, cloud_mask=True):
-    unet_file = [x for x in os.listdir(os.path.join(base_path, "data", "merged_geotiffs")) if x.endswith("_probabilities.tif")][0]
-    with rasterio.open(os.path.join(base_path, "data", "merged_geotiffs", unet_file)) as predictions:
-        prediction = predictions.read(1)
-        out_meta = predictions.meta.copy()
-        flag_file = \
-            [x for x in os.listdir(os.path.join(base_path, "data", "merged_geotiffs")) if "_cloud_cropped" in x][0]
-        masked_prediction_file = os.path.join(base_path, "data", "merged_geotiffs", id + "_" + date + "_probabilities_masked.tif")
-        if cloud_mask:
-            apply_cloud_mask(prediction, masked_prediction_file, flag_file, out_meta)
-        else:
-            with rasterio.open(masked_prediction_file, "w", **out_meta) as masked_prediction:
-                masked_prediction.write(np.expand_dims(prediction, axis=0))
-    # checks for land mask, creates it if it doesn't exist
-    # land_mask must be deleted manually if investigating new region of interest
-    if land_mask:
-        if not os.path.exists(os.path.join(base_path, "utils", "land_mask.shp")):
-            print("no land mask found, creating...")
-            create_land_mask()
-        # apply land mask to prediction file
-        print("applying land mask...")
-        apply_land_mask(masked_prediction_file)
-
-
 # applys thresholding to model output probabilities GeoTiff to produce binary prediction mask.
 def apply_threshold(dir, threshold):
     prob_files = get_files(dir, "probabilities")
@@ -153,13 +129,13 @@ def apply_threshold(dir, threshold):
         # make all probs below threshold into water
         image[image < threshold] = 2
         # write threshold prediction
-        with rasterio.open(file.strip("_probabilities.tif") + "_prediction.tif", "w", **meta) as threshold_prediction:
+        with rasterio.open(file.strip("probabilities.tif") + "prediction.tif", "w", **meta) as threshold_prediction:
             threshold_prediction.write(np.expand_dims(image, axis=0))
 
 
 # this is not used in the main pipeline. It is only to be used if masking other output files to mask predictions or probabilities.
-# This was required for visualising results for my dissertation (run as main).
-def mask_many_predictions(dir, tag,  land_mask, cloud_mask):
+# This is required for visualising results for multiple different thresholds (run as main).
+def mask_many_predictions(dir, tag,  land_mask, cloud_mask, suffix):
     files_to_mask = []
     for (root, dirs, files) in os.walk(dir, topdown=True):
         for f in files:
@@ -174,11 +150,11 @@ def mask_many_predictions(dir, tag,  land_mask, cloud_mask):
             prediction = predictions.read(1)
             out_meta = predictions.meta.copy()
 
-            masked_prediction_file = os.path.join(dir, current_dir, name + "_thresh_masked99.tif")
+            masked_prediction_file = os.path.join(dir, current_dir, name + suffix + ".tif")
 
             if cloud_mask:
                 print("applying cloud mask on " + name)
-                flag_file = [x for x in os.listdir(os.path.join(dir, current_dir)) if "_cloud_cropped" in x][0]
+                flag_file = [x for x in os.listdir(os.path.join(dir, current_dir)) if "cloud_cropped" in x][0]
                 with rasterio.open(os.path.join(dir, current_dir, flag_file)) as mask_ds:
                     # Only consider mask values == 5 (these are tagged as water by fmask).
                     mask = mask_ds.read(1) != 5
@@ -203,8 +179,9 @@ def mask_many_predictions(dir, tag,  land_mask, cloud_mask):
                     apply_land_mask(prediction_file)
 
 if __name__ == "__main__":
-    print("running as main")
+    print("Running manual masking")
+    # directory of files for masking
     data_path = os.path.join(base_path, "data", "outputs")
     # apply threshold to probability file
-    apply_threshold(data_path, 0.815)
-    mask_many_predictions(data_path, "_threshold99", land_mask=True, cloud_mask=True)
+    apply_threshold(data_path, 0.99)
+    mask_many_predictions(data_path, land_mask=True, cloud_mask=True, suffix="_manual_mask")

@@ -23,10 +23,6 @@ np.random.seed(0)
 torch.manual_seed(0)
 
 
-# # prepare subdiv for model predictions
-# def image_to_neural_input(subdiv):
-#     return torch.movedim(torch.from_numpy(subdiv), (0, 3, 1, 2), (0, 1, 2, 3))
-
 def predict(model, image):
     predictions = model(torch.movedim(image, (0, 3, 1, 2), (0, 1, 2, 3)))
     probs = torch.nn.functional.softmax(predictions.detach(), dim=1).cpu().numpy()
