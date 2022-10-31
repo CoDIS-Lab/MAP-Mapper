@@ -47,7 +47,7 @@ Then run the commands: <br> <br>
 Finally, you must specify where the proj.db file is. If using anaconda this is likely to be in th share folder of the MAP-Mapper environment. <br>
 Navigate to run.py and change the environment variable to match this path. <br><br>
 For example: <br>
-&emsp; os.environ['PROJ_LIB'] = '/home/<user>/anaconda3/envs/map-mapper/share/proj'
+&emsp; os.environ['PROJ_LIB'] = '/home/user/anaconda3/envs/map-mapper/share/proj'
 <br>
 <h2> Running </h2> 
 To run the full pipeline, with cloud and land masking, navigate to the project root directory and use the terminal command:

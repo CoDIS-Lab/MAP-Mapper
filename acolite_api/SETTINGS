@@ -11,7 +11,7 @@ dsf_exclude_bands=B9, B10
 geometry_type=grids
 
 # rayleigh reflectance
-l2w_parameters= rhorc_*
+# l2w_parameters= rhorc_*
 
 # GeoTIFF export options
 l2r_export_geotiff=True
@@ -23,6 +23,9 @@ l2w_delete_netcdf=True
 
 # output res
 s2_target_res=10
+
+#masking
+l2w_mask=False
 
 #sunglint
 glint_correction=True

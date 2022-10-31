@@ -4,8 +4,8 @@ import rasterio
 import rasterio.mask
 from rasterio import windows
 from rasterio.merge import merge
-from utils.dir_management import base_path
-
+# from utils.dir_management import base_path
+base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 merged_path = os.path.join(base_path, "data", "merged_geotiffs")
 unmerged_path = os.path.join(base_path, "data", "unmerged_geotiffs")
 window_size = 32
@@ -96,7 +96,6 @@ class ImageEngineer:
         out_meta.update({"driver": "GTiff",
                          "count": 1,
                          "nodata": 99,
-                         "dtype": "uint8",
                          "height": mosaic.shape[1],
                          "width": mosaic.shape[2],
                          "transform": out_trans
@@ -109,6 +108,8 @@ class ImageEngineer:
                              "width": mosaic.shape[2],
                              "transform": out_trans
                              })
+        if mode == "masks":
+            out_meta.update({"dtype": "uint8"})
         if output_type:
             output_type = "_" + output_type
         merged_tile = self.id + "_" + self.date + output_type
@@ -162,4 +163,3 @@ class ImageEngineer:
                         outds.write(inds.read(window=window))
                 else:
                     print(str(window.width) + "X" + str(window.height) + " cropping and ignoring file")
-
