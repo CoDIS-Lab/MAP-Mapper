@@ -8,14 +8,6 @@ base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 data_path = os.path.join(base_path, "data")
 data_dirs = ["merged_geotiffs", "outputs", "patches", "predicted_patches", "processed", "unmerged_geotiffs", "unprocessed"]
 
-def setup_directories():
-    for dir in data_dirs:
-        os.makedirs(os.path.join(data_path, "data", dir), exist_ok=True)
-        if dir == "unprocessed":
-            delete_dir(os.path.join(data_path, "unprocessed"))
-        else:
-            clean_dir(os.path.join(data_path, dir))
-
 
 def clean_dir(directory):
     for dir_path, _, filenames in os.walk(directory):
@@ -36,25 +28,36 @@ def delete_dir(directory):
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
-def clean_directories(date):
-    data_path = os.path.join(base_path, "data")
+def setup_directories():
     for dir in data_dirs:
-        if dir == "unprocessed":
-            delete_dir(os.path.join(data_path, "unprocessed"))
-        else:
-            clean_dir(os.path.join(data_path, dir))
+        os.makedirs(os.path.join(data_path, dir), exist_ok=True)
+        dir_operation_selection(dir)
 
+
+def breakdown_directories(date):
+    # save outputs
     parent_dir = os.path.join(data_path, "outputs")
-    output_path = os.path.join(parent_dir,  date)
+    output_path = os.path.join(parent_dir, date)
     if not os.path.exists(output_path):
         os.mkdir(output_path)
     tiff_path = os.path.join(data_path, "merged_geotiffs")
     # only keep geotiff and final predictions
     for f in os.listdir(tiff_path):
-        if f.endswith("cloud.tif"):
-            os.remove(os.path.join(tiff_path, f))
-        else:
+        if not f.endswith("cloud.tif"):
             shutil.move(os.path.join(tiff_path, f), os.path.join(output_path, f))
+    # clean or delete dirs
+    for dir in data_dirs:
+        dir_operation_selection(dir)
+
+
+# clean, delete or pass
+def dir_operation_selection(dir):
+    if dir == "outputs":
+        pass
+    elif dir == "unprocessed":
+        delete_dir(os.path.join(data_path, "unprocessed"))
+    else:
+        clean_dir(os.path.join(data_path, dir))
 
 
 def unzip_files(files, path):
@@ -65,7 +68,7 @@ def unzip_files(files, path):
             os.remove(zip_path)
 
 
-# gets all prediction files from directory
+# gets all files with tagfrom directory
 def get_files(path, tag):
     all_files = []
     for (root, dirs, files) in os.walk(path, topdown=True):
@@ -74,4 +77,3 @@ def get_files(path, tag):
                 file_path = os.path.join(root, f)
                 all_files.append(file_path)
     return all_files
-

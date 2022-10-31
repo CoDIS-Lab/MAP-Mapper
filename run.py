@@ -3,7 +3,7 @@ from analysis.analysis import save_coordinates_to_csv, plot_data_single_day, plo
 from fmask_api.f_mask import run_fmask
 from masking.prediction_masker import mask_prediction, crop_f_mask, apply_threshold
 import os
-from utils.dir_management import setup_directories, clean_directories, base_path, get_files
+from utils.dir_management import setup_directories, breakdown_directories, base_path, get_files
 
 sys.path.insert(0, os.path.join(base_path, "acolite-main"))
 sys.path.insert(0, os.path.join(base_path, "acolite_api"))
@@ -13,11 +13,9 @@ sys.path.insert(0, os.path.join(base_path, "smooth_patches"))
 sys.path.insert(0, os.path.join(base_path, "acolite-main", "acolite"))
 
 import argparse
-
 from sentinelsat import read_geojson
 from image_engineer.image_engineering import ImageEngineer
 from utils.geographic_utils import get_crs
-
 from datetime import datetime, timedelta
 import pandas as pd
 from semantic_segmentation.debris_predictor import create_image_prediction
@@ -27,7 +25,7 @@ from dotenv import load_dotenv
 from acolite_api.acolite_processor import run_acolite
 
 load_dotenv()
-os.environ['PROJ_LIB'] = '/home/henry/anaconda3/envs/map-mapper/share/proj'
+os.environ['PROJ_LIB'] = '/home/henry/anaconda3/envs/mapper/share/proj'
 os.environ['PROJ_DEBUG'] = "3"
 
 # code for command line interface
@@ -345,8 +343,8 @@ if __name__ == "__main__":
                 # plot single date coordinates - Currently broken, plot data by specifying the output data_path in analysis.py
                 # plot_data_single_day(date)
 
-                # clean data dirs for next iteration, save predictions and tif to historic files dir
-                clean_directories(date)
+                # clean data dirs for next iteration, save predictions and tif to output files dir
+                breakdown_directories(date)
 
         # plot all plastic detections
         plot_data(os.path.join(base_path, "data", "outputs"), "prediction_masked")
@@ -428,5 +426,5 @@ if __name__ == "__main__":
         mask_prediction(tile_id, date, image_engineer.land_mask, image_engineer.cloud_mask)
 
     if args.command == "clean":
-        clean_directories(date=args.date[0])
+        breakdown_directories(date=args.date[0])
 

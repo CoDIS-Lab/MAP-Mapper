@@ -1,0 +1,22 @@
+name: mapper
+channels:
+  - defaults
+dependencies:
+  - gdal
+  - rios
+  - python-fmask
+  - rasterio
+  - pyproj
+  - plotly
+  - pandas
+  - shapely
+  - pyshp
+  - geopandas
+  - geojson
+  - sentinelsat
+  - pytorch
+  - torchvision
+  - python-dotenv
+  - netcdf4
+  - scikit-image
+prefix: /home/henry/anaconda3/envs/mapper

@@ -43,7 +43,7 @@ def create_land_mask():
     # only non-convex 4 sided polygons
     clipped_shp = gpd.read_file(os.path.join(base_path, "utils", "world_land", "land_polygons.shp"), bbox=Polygon([(xmin, ymin), (xmin, ymax), (xmax, ymax), (xmax, ymin), (xmin, ymin)]))
     # Save clipped shapefile
-    clipped_shp.to_file(os.path.join(base_path, "utils", "land_mask.shp"), driver="ESRI Shapefile")
+    clipped_shp.to_file(os.path.join(base_path, "utils", "region_land", "land_mask.shp"), driver="ESRI Shapefile")
 
 
 # apply the land mask to the file (prediction mask)
@@ -56,7 +56,7 @@ def apply_land_mask(file_path):
     transform_raster(file_path, 'EPSG:4326')
     with rasterio.open(file_path) as src:
         # get land mask polygons
-        sf = shapefile.Reader(os.path.join(base_path, "utils", "land_mask.shp"))
+        sf = shapefile.Reader(os.path.join(base_path, "utils", "region_land", "land_mask.shp"))
         shapes = sf.shapes()
         # apply mask, invert is used to mask land, rather than ocean
         out_image, out_transform = rasterio.mask.mask(src, shapes, invert=True)
@@ -109,7 +109,7 @@ def mask_prediction(id, date, land_mask=True, cloud_mask=True):
         # checks for land mask, creates it if it doesn't exist
         # land_mask must be deleted manually if investigating new region of interest
         if land_mask:
-            if not os.path.exists(os.path.join(base_path, "utils", "land_mask.shp")):
+            if not os.path.exists(os.path.join(base_path, "utils", "region_land", "land_mask.shp")):
                 print("no land mask found, creating...")
                 create_land_mask()
             # apply land mask to prediction file
