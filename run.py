@@ -136,21 +136,7 @@ if __name__ == "__main__":
         "acolite",
         help='complete acolite processing on SAFE files'
         )
-    acolite.add_argument(
-        '-date',
-        nargs=1,
-        type=str,
-        default=datetime.today().strftime("%Y%m%d"),
-        help='date of SAFE files for processing',
-        dest="date"
-        )
-    acolite.add_argument(
-        '-tile_id',
-        nargs=1,
-        type=str,
-        help='Tile ID',
-        dest="tile_id"
-    )
+
     # Merge acolite outputs into multi-banded geotiff
     combine_acolite = subparsers.add_parser(
         'combine_acolite',
@@ -235,6 +221,14 @@ if __name__ == "__main__":
         'clean',
         help='WARNING! Removes all data associated with sentinel downloads, '
              'processing and predictions in the "data" directory tree'
+    )
+
+    clean.add_argument(
+        '-date',
+        nargs=1,
+        type=str,
+        help='date',
+        dest="date"
     )
     # parse args
     args = parser.parse_args()
@@ -373,7 +367,6 @@ if __name__ == "__main__":
         run_fmask(path)
 
     if args.command == "combine_acolite":
-
         date = args.date[0]
         tile_id = args.tile_id[0]
 
@@ -404,14 +397,25 @@ if __name__ == "__main__":
         create_image_prediction()
 
         # merge predicted masks into one file
-        image_engineer.merge_tiles(directory=os.path.join(base_path, "data", "predicted_patches"), mode="masks")
+        image_engineer.merge_tiles(directory=os.path.join(base_path, "data", "predicted_patches"), mode="probs")
 
     if args.command == "mask":
+
+        threshold = 0.99
+
+        # apply threshold
+        apply_threshold(os.path.join(base_path, "data", "merged_geotiffs"), threshold)
 
         date = args.date[0]
         tile_id = args.tile_id[0]
 
-        image_engineer = image_engineer(date=date, id=tile_id, land_mask=args.land_mask, cloud_mask=args.cloud_mask)
+        image_engineer = ImageEngineer(date=date, id=tile_id, land_mask=args.land_mask, cloud_mask=args.cloud_mask)
+
+        # run f-mask on each sentinel SAFE file
+        run_fmask(os.path.join(base_path, "data", "unprocessed"))
+
+        # merge f-masks into one large mask
+        image_engineer.merge_tiles(directory=os.path.join(base_path, "data", "merged_geotiffs"), mode="clouds")
 
         # get crs from sentinel tile
         image_engineer.crs = get_crs()

@@ -167,7 +167,7 @@ def mask_many_predictions(dir, tag,  land_mask, cloud_mask, suffix):
             if land_mask:
                 # checks for land mask, creates it if it doesn't exist
                 # land_mask must be deleted manually if investigating new region of interest
-                if not os.path.exists(os.path.join(base_path, "utils", "land_mask.shp")):
+                if not os.path.exists(os.path.join(base_path, "utils", "region_land", "land_mask.shp")):
                     print("no land mask found, creating...")
                     create_land_mask()
                 # apply land mask to prediction file
@@ -182,6 +182,8 @@ if __name__ == "__main__":
     print("Running manual masking")
     # directory of files for masking
     data_path = os.path.join(base_path, "data", "outputs")
+    data_path = "/home/henry/Desktop/dissertation_data/BOH-2/historic_files"
     # apply threshold to probability file
-    apply_threshold(data_path, 0.99)
-    mask_many_predictions(data_path, land_mask=True, cloud_mask=True, suffix="_manual_mask")
+    #apply_threshold(data_path, 0.99)
+    mask_many_predictions(data_path, "probabilities", land_mask=True, cloud_mask=True, suffix="probabilities_masked")
+    # mask_prediction("T51PTR", "20220507", True, True)
