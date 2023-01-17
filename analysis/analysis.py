@@ -2,10 +2,10 @@ import rasterio
 import numpy as np
 import os
 import sys
-
+print(sys.path)
+sys.path.append("..")
 from coordinate_generators import generate_threshold_coords, generate_plastic_coordinates
 from mean_pixel_values import latlon2distance, my_mean
-print(sys.path)
 from utils.dir_management import get_files, base_path
 from pyproj import Transformer
 import plotly.figure_factory as ff
@@ -13,8 +13,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from rasterio import merge
-from data_filters import mean_pixel_value_filter, bathymetry_filter, class_percentages_filter
-
+from data_filters import mean_pixel_value_filter, bathymetry_filter, class_percentages_filter, port_mask
 
 # plotly_params
 hex_bin_number = 6  # higher number results in smaller and more numerous hex_bins
@@ -22,13 +21,13 @@ hex_bin_opacity = 0.5  # 0 (invisible) to 1 (opaque)
 data_marker_size = 2  # plotted plastic detection marker size
 data_marker_opacity = 0.4  # 0 (invisible) to 1 (opaque)
 min_detection_count = 0  # lowest number of plastic detections needed for a hex_bin to be visualised on the map
-max_plastic_percentage = 0.01 # remove all dates
+max_plastic_percentage = 0.1 # remove all dates
 close_to_land_mask = 2 # mask detections close to land (in km)
 land_blur = 0.008999*close_to_land_mask
 #excessive fmasking indicates scene is highly impacted by clouds or sunglint, removes dates with high mask percentage
-max_masking_percentage = 40
+max_masking_percentage = 80
 min_depth = 5
-
+port_mask_distance = 2500
 
 # code to find and plot all suspected plastic on a map
 def plot_data(df):
@@ -204,6 +203,7 @@ def get_pixel_mean_values(probabilities_tag, data_path, fname, filtered_df):
     df4.to_csv(os.path.join(base_path, "data", "outputs", fname3), index=False)
     return df4
 
+
 def plot_mean_pixel_val_map(file):
     df3 = pd.read_csv(file)
     c1 = [np.abs(df3.latitude.mean()), np.abs(df3.longitude.max())]
@@ -236,44 +236,33 @@ def plot_mean_pixel_val_map(file):
 def get_data(data_path, prediction_tag, bathymetry_file):
     fname = os.path.basename(data_path)
     df = class_percentages_filter(data_path, prediction_tag, max_plastic_percent=max_plastic_percentage, max_masking_percent=max_masking_percentage, land_blurring=land_blur)
-    bathymetry_filter(df, min_depth=min_depth, file=bathymetry_file)
+    df = bathymetry_filter(df, min_depth=min_depth, file=bathymetry_file)
     df = get_pixel_mean_values("probabilities_masked", data_path, fname, df)
     df = mean_pixel_value_filter(df)
+    df = port_mask(df, port_mask_distance)
+    plot_data(df)
     return df
 
+
+
 if __name__ == "__main__":
-    #plot_data()
-    #plot_data_from_csv("cornwall.csv")
-   #  print("Analysing MAP-Mapper outputs and plotting plastic detections...")
-    #data_path = os.path.join(base_path, "data", "outputs")
-   #  data_path ="/home/henry/Desktop/mumbai"
-   #  data_path = "/home/henry/Downloads/argentina"
-   #  #data_path = "/home/henry/Desktop/dissertation_data/cornwall/historic_files"
-   #  df = get_data(data_path, "prediction_masked", "/home/henry/PycharmProjects/plastic_pipeline_conda/utils/bathymetry_maps/argentina.tif")
-   # # #  #data_path = "/home/henry/Desktop/dissertation_data/cornwall/historic_files"
-   # # #  data_path = "/home/henry/Desktop/mumbai"
-   # # #  #save_coordinates_to_csv(data_path, "thresh_masked99")
-   # # # # plot_data("thresh_masked99", data_path)
-   # #  #plot_data("prediction", data_path)
-   # # #  #plot_data_by_day("prediction_masked", data_path)
-   #  plot_data(df)
-    plot_mean_pixel_val_map(os.path.join(base_path, "data", "outputs", "argentina.csv"))
-    # plot_probabilities("probabilities_masked", data_path, 0.95)
+    print("Analysing MAP-Mapper outputs and plotting plastic detections...")
+    data_path = os.path.join(base_path, "data", "outputs")
+    # data_path ="/home/henry/Desktop/mumbai"
+    # data_path = "/home/henry/Downloads/argentina"
+   # data_path = "/home/henry/Desktop/dissertation_data/cornwall/historic_files"
 
-    ##################################################
-    # to run the code for Manila in command line you need to type
-    # python mapping3.py "Manila"
-    #################################################
-   #  file = "outputs"
-   #  #file = "BOH"
-   #  #data_path = os.path.join(base_path, "data", file)
-   #  #data_path = "/home/henry/Desktop/dissertation_data/argentina"
+    df = get_data(data_path, "prediction_masked", "/home/henry/PycharmProjects/plastic_pipeline_conda/utils/bathymetry_maps/manila.tif")
+    df.to_csv("manila_port_filtered2.csv", index=False)
+    plot_data(df)
+   #  file = os.path.join(base_path, "analysis", "manila_port_filtered.csv")
+   # # file = os.path.join(base_path, "data", "outputs", "cornwall_gmaps_heatmap.csv")
+   #  plot_data(pd.read_csv(file))
+    #plot_mean_pixel_val_map(file)
 
-   # # data_path = "/home/henry/Desktop/mumbai"
-   #  if path.exists(
-   #          file + "4.csv"):  # if you run the code once, it will create the csv file and after that everytime you run this code it plots those calculated results. If you change something and need a new plot, please delete the csv file and run afterwrds.
-   #      plot_maps(file)
-   #  else:
-   #      get_coordinates("probabilities_masked", "prediction_masked", data_path,
-   #                      file)  # we are taking land masked probability maps directly.
-   #      plot_maps(file)
+    # if os.path.exists(file):  # if you run the code once, it will create the csv file and after that everytime you run this code it plots those calculated results. If you change something and need a new plot, please delete the csv file and run afterwrds.
+    #     plot_mean_pixel_val_map(file)
+    # else:
+    #     df = get_data(data_path, "prediction_masked",
+    #                   "/home/henry/PycharmProjects/plastic_pipeline_conda/utils/bathymetry_maps/argentina.tif")
+    #     plot_mean_pixel_val_map(file)

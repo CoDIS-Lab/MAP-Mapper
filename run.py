@@ -1,17 +1,17 @@
 import sys
-from analysis.analysis import save_coordinates_to_csv, plot_data_single_day, plot_data
+
 from fmask_api.f_mask import run_fmask
 from masking.prediction_masker import mask_prediction, crop_f_mask, apply_threshold
 import os
 from utils.dir_management import setup_directories, breakdown_directories, base_path, get_files
-
+sys.path.insert(0, os.path.join(base_path, "analysis"))
 sys.path.insert(0, os.path.join(base_path, "acolite-main"))
 sys.path.insert(0, os.path.join(base_path, "acolite_api"))
 sys.path.insert(0, os.path.join(base_path, "semantic_segmentation"))
 sys.path.insert(0, os.path.join(base_path, "sentinel_downloader"))
 sys.path.insert(0, os.path.join(base_path, "smooth_patches"))
 sys.path.insert(0, os.path.join(base_path, "acolite-main", "acolite"))
-
+from analysis import save_coordinates_to_csv, plot_data
 import argparse
 from sentinelsat import read_geojson
 from image_engineer.image_engineering import ImageEngineer
@@ -332,7 +332,7 @@ if __name__ == "__main__":
                 mask_prediction(id=image_engineer.id, date=image_engineer.date, land_mask=image_engineer.land_mask, cloud_mask=image_engineer.cloud_mask)
 
                 # get plastic coordinates and save to csv
-                save_coordinates_to_csv(os.path.join(base_path, "data", "merged_geotiffs"), "prediction_masked")
+                #save_coordinates_to_csv(os.path.join(base_path, "data", "merged_geotiffs"), "prediction_masked")
 
                 # plot single date coordinates - Currently broken, plot data by specifying the output data_path in analysis.py
                 # plot_data_single_day(date)
@@ -341,7 +341,7 @@ if __name__ == "__main__":
                 breakdown_directories(date)
 
         # plot all plastic detections
-        plot_data(os.path.join(base_path, "data", "outputs"), "prediction_masked")
+        # get df and plot
 
     if args.command == "download":
         date = args.date[0]

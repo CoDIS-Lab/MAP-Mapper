@@ -182,7 +182,7 @@ if __name__ == "__main__":
     print("Running manual masking")
     # directory of files for masking
     data_path = os.path.join(base_path, "data", "outputs")
-    data_path = "/home/henry/Desktop/dissertation_data/BOH-2/historic_files"
+    data_path = "/home/henry/Desktop/dissertation_data/cornwall/historic_files"
     # apply threshold to probability file
     #apply_threshold(data_path, 0.99)
     mask_many_predictions(data_path, "probabilities", land_mask=True, cloud_mask=True, suffix="probabilities_masked")
