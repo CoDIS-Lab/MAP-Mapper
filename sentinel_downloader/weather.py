@@ -3,10 +3,8 @@ import urllib.request
 import urllib.error
 import os
 from statistics import mean
-from urllib.request import urlopen
 from utils.dir_management import base_path
 import geojson
-from dotenv import load_dotenv
 import json
 
 

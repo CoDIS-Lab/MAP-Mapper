@@ -1,14 +1,13 @@
-import matplotlib.pyplot as plt
 import pandas as pd
-import numpy as np
 import os
 import sys
 from coordinate_generators import generate_plastic_coordinates
+from utils.geographic_utils import get_min_max_long_lat
+
 print(sys.path)
 sys.path.append("..")
 from utils.dir_management import get_files, base_path
 from rasterstats import point_query
-import geojson
 import numpy as np
 from cartopy.geodesic import Geodesic
 
@@ -113,15 +112,7 @@ def create_port_csv():
 
 
 def get_region_ports():
-    with open(os.path.join(base_path, "poly.geojson")) as f:
-        gj = geojson.load(f)
-    features = gj['coordinates'][0]
-    longs = [x[0] for x in features]
-    lats = [x[1] for x in features]
-    min_lon = min(longs)
-    max_lon = max(longs)
-    min_lat = min(lats)
-    max_lat = max(lats)
+    min_lon, max_lon, min_lat, max_lat = get_min_max_long_lat()
     df = pd.read_csv(os.path.join(base_path, "utils", "ports", "all_ports.csv"))
     for index, row in df.iterrows():
         if min_lon <= float(row["longitude"]) <= max_lon and min_lat <= float(row["latitude"]) <= max_lat:
