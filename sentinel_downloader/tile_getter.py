@@ -17,29 +17,30 @@ import shapely.wkt
 user_name = os.environ.get('USER_NAME')
 password = os.environ.get('PASSWORD')
 weather_key = os.environ.get('WEATHER')
-SL = SentinelLoader(start_date='20210101', end_date='20220101', max_cloud_percentage='20', max_wind_speed='0')
+SL = SentinelLoader(start_date='20220101', end_date='20220202', max_cloud_percentage='20', max_wind_speed='0')
 SL.get_product_data()
 print(SL)
 
-min_lon, max_lon, min_lat, max_lat = get_min_max_long_lat()
-longitudes = np.arange(min_lon, max_lon, 0.01)
+if SL.products:
+    min_lon, max_lon, min_lat, max_lat = get_min_max_long_lat()
+    longitudes = np.arange(min_lon, max_lon, 0.1)
 
-latitudes = np.arange(min_lat, max_lat, 0.01)
-ocean_coords = []
-for lat in latitudes:
-    for lon in longitudes:
-        if globe.is_ocean(lat, lon):
-            # lon lat format for polygon intersection
-            ocean_coords.append([lon, lat])
+    latitudes = np.arange(min_lat, max_lat, 0.1)
+    ocean_coords = []
+    for lat in latitudes:
+        for lon in longitudes:
+            if globe.is_ocean(lat, lon):
+                # lon lat format for polygon intersection
+                ocean_coords.append([lon, lat])
 
-SL_products = SL.products.copy()
-for key, val in SL.products.items():
-    valid_points = []
-    polygon = shapely.wkt.loads(val['footprint'])
-    points = MultiPoint(ocean_coords)
-    p = polygon.intersection(points)
-    if p.is_empty:
-        del SL_products[key]
+    SL_products = SL.products.copy()
+    for key, val in SL.products.items():
+        valid_points = []
+        polygon = shapely.wkt.loads(val['footprint'])
+        points = MultiPoint(ocean_coords)
+        p = polygon.intersection(points)
+        if p.is_empty:
+            del SL_products[key]
 
-SL.products = SL_products
-print(SL.products.items())
+    SL.products = SL_products
+    print(SL.products.items())

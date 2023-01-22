@@ -2,9 +2,12 @@ import rasterio
 import numpy as np
 import os
 import sys
+
+from dotenv import load_dotenv
+
 print(sys.path)
 sys.path.append("..")
-from coordinate_generators import generate_threshold_coords, generate_plastic_coordinates
+from coordinate_generators import generate_threshold_coords, generate_plastic_coordinates, generate_plastic_coordinates2
 from mean_pixel_values import latlon2distance, my_mean
 from utils.dir_management import get_files, base_path
 from pyproj import Transformer
@@ -15,6 +18,11 @@ import plotly.graph_objects as go
 from rasterio import merge
 from data_filters import mean_pixel_value_filter, bathymetry_filter, class_percentages_filter, port_mask
 
+
+load_dotenv()
+
+
+mapbox_token = os.environ.get('MAPBOX')
 # plotly_params
 hex_bin_number = 6  # higher number results in smaller and more numerous hex_bins
 hex_bin_opacity = 0.5  # 0 (invisible) to 1 (opaque)
@@ -90,6 +98,18 @@ def save_coordinates_to_csv(data_path, tag):
         df.to_csv(os.path.join(data_path, "plastic_coordinates.csv"), mode="a", header=False)
     else:
         df.to_csv(os.path.join(data_path, "plastic_coordinates.csv"), mode="w", header=True)
+
+
+def save_coordinates_to_csv2(tiff_path, tag):
+    all_point_data = []
+    for file in sorted(get_files(tiff_path, tag)):
+        date = os.path.basename(file).split("_")[1]
+        all_point_data.extend(generate_plastic_coordinates2(file, date))
+    df = pd.DataFrame(all_point_data, columns=['latitude', 'longitude', 'date', 'plastic_percentage', 'mask_percentage'])
+    if os.path.exists(os.path.join(data_path, "outputs", "plastic_coordinates.csv")):
+        df.to_csv(os.path.join(data_path, "outputs", "plastic_coordinates.csv"), mode="a", header=False)
+    else:
+        df.to_csv(os.path.join(data_path, "outputs", "plastic_coordinates.csv"), mode="w", header=True)
 
 
 def plot_data_single_day(date):
@@ -211,8 +231,7 @@ def plot_mean_pixel_val_map(file):
     hexagon_size = np.round(latlon2distance(c1, c2) / 5).astype(int)
     df4 = df3.nlargest(50, 'vals')  # taking 10 largest MDM values
     if not df3.empty:
-        px.set_mapbox_access_token(
-            "pk.eyJ1Ijoib2thcmFrdXMiLCJhIjoiY2w5bjlmd28xMDRrbzN2czVubzJ6eWFueSJ9.MWPE4mLxoJjv3Cmr1N6OQA")
+        px.set_mapbox_access_token(mapbox_token)
         fig = ff.create_hexbin_mapbox(
             data_frame=df3, lat="latitude", lon="longitude", color='vals', agg_func=my_mean,
             nx_hexagon=hexagon_size, opacity=0.5, labels={"color": "MPM"},
@@ -236,10 +255,14 @@ def plot_mean_pixel_val_map(file):
 def get_data(data_path, prediction_tag, bathymetry_file):
     fname = os.path.basename(data_path)
     df = class_percentages_filter(data_path, prediction_tag, max_plastic_percent=max_plastic_percentage, max_masking_percent=max_masking_percentage, land_blurring=land_blur)
-    df = bathymetry_filter(df, min_depth=min_depth, file=bathymetry_file)
-    df = get_pixel_mean_values("probabilities_masked", data_path, fname, df)
-    df = mean_pixel_value_filter(df)
-    df = port_mask(df, port_mask_distance)
+    if not df.empty:
+        df = bathymetry_filter(df, min_depth=min_depth, file=bathymetry_file)
+    if not df.empty:
+        df = get_pixel_mean_values("probabilities_masked", data_path, fname, df)
+    if not df.empty:
+        df = mean_pixel_value_filter(df)
+    if not df.empty:
+        df = port_mask(df, port_mask_distance)
     plot_data(df)
     return df
 
@@ -253,7 +276,7 @@ if __name__ == "__main__":
    # data_path = "/home/henry/Desktop/dissertation_data/cornwall/historic_files"
 
     df = get_data(data_path, "prediction_masked", "/home/henry/PycharmProjects/plastic_pipeline_conda/utils/bathymetry_maps/manila.tif")
-    df.to_csv("manila_port_filtered2.csv", index=False)
+    df.to_csv("manila_port_filtered4.csv", index=False)
     plot_data(df)
    #  file = os.path.join(base_path, "analysis", "manila_port_filtered.csv")
    # # file = os.path.join(base_path, "data", "outputs", "cornwall_gmaps_heatmap.csv")

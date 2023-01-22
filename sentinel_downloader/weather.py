@@ -19,7 +19,6 @@ def check_wind(max_wind_speed, date):
         xmax = max([coord[0] for coord in features])
         ymin = min([coord[1] for coord in features])
         ymax = max([coord[1] for coord in features])
-        start_date = "20210714"
         # get mid-point of polygon for location reference
         location = str(mean([float(ymax), float(ymin)])) + "," + str(mean([float(xmax), float(xmin)]))
         # build API QUERY
