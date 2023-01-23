@@ -40,7 +40,7 @@ def generate_plastic_coordinates(file, date, land_blurring):
     return dated_coords, plastic_percentage, mask_percentage
 
 
-def generate_plastic_coordinates2(file, date):
+def generate_plastic_coordinates2(file, date, tile):
     src = rasterio.open(file)
     meta = src.meta
     image = src.read(1)
@@ -63,6 +63,7 @@ def generate_plastic_coordinates2(file, date):
     for coord in coords:
         dated_coord = list(coord)
         dated_coord.append(date)
+        dated_coord.append(tile)
         dated_coord.append(plastic_percentage)
         dated_coord.append(mask_percentage)
         dated_coords.append(dated_coord)

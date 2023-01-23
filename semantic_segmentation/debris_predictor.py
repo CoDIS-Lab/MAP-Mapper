@@ -106,7 +106,6 @@ def create_image_prediction():
                          "count": 1,
                          "dtype": "float32",
                          "nodata": 99})
-                    print("predicted_shape: ",  probs.shape)
                     with rasterio.open(
                             os.path.join(base_path, "data", "predicted_patches", file.strip(".tif") + "_probs.tif"), "w",
                             **out_meta_probs) as dst:

@@ -104,12 +104,13 @@ def save_coordinates_to_csv2(tiff_path, tag):
     all_point_data = []
     for file in sorted(get_files(tiff_path, tag)):
         date = os.path.basename(file).split("_")[1]
-        all_point_data.extend(generate_plastic_coordinates2(file, date))
-    df = pd.DataFrame(all_point_data, columns=['latitude', 'longitude', 'date', 'plastic_percentage', 'mask_percentage'])
-    if os.path.exists(os.path.join(data_path, "outputs", "plastic_coordinates.csv")):
-        df.to_csv(os.path.join(data_path, "outputs", "plastic_coordinates.csv"), mode="a", header=False)
+        tile = os.path.basename(file).split("_")[1]
+        all_point_data.extend(generate_plastic_coordinates2(file, date, tile))
+    df = pd.DataFrame(all_point_data, columns=['latitude', 'longitude', 'date', 'tile_id', 'plastic_percentage', 'mask_percentage'])
+    if os.path.exists(os.path.join(base_path, "data", "outputs", "plastic_coordinates.csv")):
+        df.to_csv(os.path.join(base_path, "data", "outputs", "plastic_coordinates.csv"), mode="a", header=False)
     else:
-        df.to_csv(os.path.join(data_path, "outputs", "plastic_coordinates.csv"), mode="w", header=True)
+        df.to_csv(os.path.join(base_path, "data", "outputs", "plastic_coordinates.csv"), mode="w", header=True)
 
 
 def plot_data_single_day(date):
@@ -270,14 +271,16 @@ def get_data(data_path, prediction_tag, bathymetry_file):
 
 if __name__ == "__main__":
     print("Analysing MAP-Mapper outputs and plotting plastic detections...")
-    data_path = os.path.join(base_path, "data", "outputs")
-    # data_path ="/home/henry/Desktop/mumbai"
-    # data_path = "/home/henry/Downloads/argentina"
-   # data_path = "/home/henry/Desktop/dissertation_data/cornwall/historic_files"
-
-    df = get_data(data_path, "prediction_masked", "/home/henry/PycharmProjects/plastic_pipeline_conda/utils/bathymetry_maps/manila.tif")
-    df.to_csv("manila_port_filtered4.csv", index=False)
-    plot_data(df)
+    save_coordinates_to_csv2(os.path.join(base_path, "data", "outputs"), 'prediction_masked')
+    plot_data_from_csv("/home/henry/PycharmProjects/plastic_pipeline_conda/data/outputs/plastic_coordinates.csv")
+   #  data_path = os.path.join(base_path, "data", "outputs")
+   #  # data_path ="/home/henry/Desktop/mumbai"
+   #  # data_path = "/home/henry/Downloads/argentina"
+   # # data_path = "/home/henry/Desktop/dissertation_data/cornwall/historic_files"
+   #
+   #  df = get_data(data_path, "prediction_masked", "/home/henry/PycharmProjects/plastic_pipeline_conda/utils/bathymetry_maps/manila.tif")
+   #  df.to_csv("manila_port_filtered4.csv", index=False)
+   #  plot_data(df)
    #  file = os.path.join(base_path, "analysis", "manila_port_filtered.csv")
    # # file = os.path.join(base_path, "data", "outputs", "cornwall_gmaps_heatmap.csv")
    #  plot_data(pd.read_csv(file))

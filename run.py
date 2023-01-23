@@ -288,7 +288,7 @@ if __name__ == "__main__":
                         with Pool(len(bundles)) as p:
                             print(p.map(run_acolite, bundles))
                     print("processing files........")
-                    image_engineer = ImageEngineer(id=tile_id, date=start_date, land_mask=args.land_mask, cloud_mask=args.cloud_mask)
+                    image_engineer = ImageEngineer(id=tile_id, date=date, land_mask=args.land_mask, cloud_mask=args.cloud_mask)
 
                     # get crs of SAFE file
                     image_engineer.crs = get_crs()
@@ -359,8 +359,7 @@ if __name__ == "__main__":
                         #         print(p.map(run_acolite, bundles))
                         run_acolite(product)
                         print("processing files........")
-                        image_engineer = ImageEngineer(id=tile_id, date=start_date, land_mask=args.land_mask,
-                                                       cloud_mask=args.cloud_mask)
+                        image_engineer = ImageEngineer(id=tile_id, date=date, land_mask=args.land_mask, cloud_mask=args.cloud_mask)
 
                         # get crs of SAFE file
                         image_engineer.crs = get_crs()
@@ -389,6 +388,7 @@ if __name__ == "__main__":
                         image_engineer.merge_tiles(directory=os.path.join(base_path, "data", "predicted_patches"),
                                                    mode="probs")
 
+                        # *** NEEDS TO CHANGE TO FIRST STEP - PREVENT PROCESSING SCENES WITH EXCESSIVE CLOUD ***
                         # run f-mask on each sentinel SAFE file
                         run_fmask(os.path.join(base_path, "data", "unprocessed"))
 
