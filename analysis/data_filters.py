@@ -1,6 +1,9 @@
 import pandas as pd
 import os
 import sys
+
+import rasterio
+
 from coordinate_generators import generate_plastic_coordinates
 from utils.geographic_utils import get_min_max_long_lat
 
@@ -10,6 +13,23 @@ from utils.dir_management import get_files, base_path
 from rasterstats import point_query
 import numpy as np
 from cartopy.geodesic import Geodesic
+
+
+# Returns the total amount of masking for the image (Clear and Water values considered unmasked).
+def get_fmask_percentage(file):
+    src = rasterio.open(file)
+    image = src.read(1)
+    total_pixels = np.count_nonzero(image > 0)
+    total_masked_pixels = ((1 < image) & (image < 5)).sum()
+    try:
+        return (total_masked_pixels / total_pixels) * 100
+    except ZeroDivisionError:
+        if total_masked_pixels == 0:
+            return 0
+        else:
+            return 100
+
+
 
 def mean_pixel_value_filter(df):
     MPM = df.vals.values.tolist()

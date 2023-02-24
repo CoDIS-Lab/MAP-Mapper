@@ -1,7 +1,9 @@
 import os
 import shutil
 import zipfile
+from time import sleep
 
+from retry import retry
 
 # project directory
 base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,7 +38,7 @@ def setup_directories():
 
 def clear_downloads():
     for dir in os.listdir(os.path.join(data_path, "downloads")):
-        os.remove(os.path.join(data_path, "downloads", dir))
+        shutil.rmtree(os.path.join(data_path, "downloads", dir))
 
 
 def breakdown_directories(date):
@@ -69,8 +71,26 @@ def unzip_files(files, path):
     for file in files:
         zip_path = os.path.join(path, file)
         with zipfile.ZipFile(os.path.join(zip_path), 'r') as zip_ref:
-            zip_ref.extractall(path)
-            os.remove(zip_path)
+            retries = 0
+            while True:
+                retries += 1
+                try:
+                    zip_ref.extractall(path)
+                    os.remove(zip_path)
+                    break
+                except (AttributeError, zipfile.BadZipFile) as e:
+                    print(f'Issue when unzipping{zip_ref}, retrying in 3 sec', e)
+                    sleep(3)
+                if retries > 1:
+                    print(f'{zip_ref} corrupted, removing from analysis...')
+                    try:
+                        os.remove(zip_path)
+                    except FileNotFoundError:
+                        pass
+                    try:
+                        shutil.rmtree(zip_path.strip(".zip") + ".SAFE")
+                    except FileNotFoundError:
+                        pass
 
 
 # gets all files with tagfrom directory

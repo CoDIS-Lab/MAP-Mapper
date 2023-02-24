@@ -1,8 +1,12 @@
 import os
+
+from retry import retry
+
 from utils.dir_management import base_path
 import acolite as ac
 
 
+@retry(tries=6, delay=0, max_delay=4, backoff=2)
 def run_acolite(bundle):
     # scenes to process
     # output directory
