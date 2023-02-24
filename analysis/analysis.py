@@ -271,7 +271,7 @@ def get_data(data_path, prediction_tag, bathymetry_file):
 
 if __name__ == "__main__":
     print("Analysing MAP-Mapper outputs and plotting plastic detections...")
-    save_coordinates_to_csv2(os.path.join(base_path, "data", "outputs"), 'prediction_masked')
+    #save_coordinates_to_csv2(os.path.join(base_path, "data", "outputs"), 'prediction_masked')
     plot_data_from_csv("/home/henry/PycharmProjects/plastic_pipeline_conda/data/outputs/plastic_coordinates.csv")
    #  data_path = os.path.join(base_path, "data", "outputs")
    #  # data_path ="/home/henry/Desktop/mumbai"

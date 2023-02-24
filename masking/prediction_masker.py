@@ -181,9 +181,10 @@ def mask_many_predictions(dir, tag,  land_mask, cloud_mask, suffix):
 if __name__ == "__main__":
     print("Running manual masking")
     # directory of files for masking
-    data_path = os.path.join(base_path, "data", "outputs")
-    data_path = "/home/henry/Desktop/dissertation_data/cornwall/historic_files"
-    # apply threshold to probability file
-    #apply_threshold(data_path, 0.99)
-    mask_many_predictions(data_path, "probabilities", land_mask=True, cloud_mask=True, suffix="probabilities_masked")
-    # mask_prediction("T51PTR", "20220507", True, True)
+    # data_path = os.path.join(base_path, "data", "outputs")
+    # data_path = "/home/henry/Desktop/dissertation_data/cornwall/historic_files"
+    # # apply threshold to probability file
+    # #apply_threshold(data_path, 0.99)
+    # mask_many_predictions(data_path, "probabilities", land_mask=True, cloud_mask=True, suffix="probabilities_masked")
+    # # mask_prediction("T51PTR", "20220507", True, True)
+    apply_land_mask("/home/henry/PycharmProjects/plastic_pipeline_conda/data/outputs/20220825/T50QRD_20220825.tif")
