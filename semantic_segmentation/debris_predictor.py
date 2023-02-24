@@ -61,45 +61,54 @@ def create_image_prediction():
     model.eval()
     patch_path = os.path.join(base_path, "data", "patches")
     for file in os.listdir(patch_path):
-        print("predictions on " + file)
         with rasterio.open(os.path.join(patch_path, file)) as src:
-            # prepare and preprocess image patch prior to patch predictions
             input_img = src.read()
-            input_img = np.moveaxis(input_img, (1, 2, 0), (0, 1, 2))
-            out_meta = src.meta
-            input_img = transform_test(input_img)
-            input_img = standardization(input_img)
-            input_img = torch.movedim(input_img, (1, 2, 0), (0, 1, 2))
-            # send to device
-            input_img = input_img.to(device)
-            with torch.no_grad():
-                predictions_smooth = predict_img_with_smooth_windowing(
-                    input_img,
-                    window_size=32,
-                    subdivisions=2,  # Minimal amount of overlap for windowing. Must be an even number.
-                    nb_classes=2,
-                    model=model,
-                    pred_func=lambda img_batch_subdiv: predict(model, torch.from_numpy(img_batch_subdiv))
-                )
-                # makes nan values max value in cloud channel
-                # nan values are classified as cloud (ignored in final analysis) #not MD
-
-                probs = copy.deepcopy(predictions_smooth)
-                probs = probs[:, :, 0]
-                probs = np.expand_dims(probs, axis=0)
-
-                out_meta_probs = out_meta
-
-                out_meta_probs.update(
-                    {"height": probs.shape[1],
-                     "width": probs.shape[2],
-                     "count": 1,
+            # this code enables images patches with all NaN values to be skipped from predictions
+            if np.isnan(input_img).all():
+                print(f"{file} contains all NaN values, skipping...")
+                out_meta = src.meta
+                input_img = input_img[0, :, :]
+                input_img = np.expand_dims(input_img, axis=0)
+                out_meta.update(
+                    {"count": 1,
                      "dtype": "float32",
                      "nodata": 99})
-
                 with rasterio.open(
                         os.path.join(base_path, "data", "predicted_patches", file.strip(".tif") + "_probs.tif"), "w",
-                        **out_meta_probs) as dst:
-                    dst.write(probs)
+                        **out_meta) as dst:
+                    dst.write(input_img)
+            # prepare and preprocess image patch prior to patch predictions
+            else:
+                print(f"making predictions on {file}")
+                input_img = np.moveaxis(input_img, (1, 2, 0), (0, 1, 2))
+                out_meta = src.meta
+                input_img = transform_test(input_img)
+                input_img = standardization(input_img)
+                input_img = torch.movedim(input_img, (1, 2, 0), (0, 1, 2))
+                # send to device
+                input_img = input_img.to(device)
+                with torch.no_grad():
+                    predictions_smooth = predict_img_with_smooth_windowing(
+                        input_img,
+                        window_size=32,
+                        subdivisions=2,  # Minimal amount of overlap for windowing. Must be an even number.
+                        nb_classes=2,
+                        model=model,
+                        pred_func=lambda img_batch_subdiv: predict(model, torch.from_numpy(img_batch_subdiv))
+                    )
+                    probs = copy.deepcopy(predictions_smooth)
+                    probs = probs[:, :, 0]
+                    probs = np.expand_dims(probs, axis=0)
+                    out_meta_probs = out_meta
+                    out_meta_probs.update(
+                        {"height": probs.shape[1],
+                         "width": probs.shape[2],
+                         "count": 1,
+                         "dtype": "float32",
+                         "nodata": 99})
+                    with rasterio.open(
+                            os.path.join(base_path, "data", "predicted_patches", file.strip(".tif") + "_probs.tif"), "w",
+                            **out_meta_probs) as dst:
+                        dst.write(probs)
 
 

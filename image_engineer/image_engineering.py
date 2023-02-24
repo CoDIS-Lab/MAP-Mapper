@@ -47,17 +47,19 @@ class ImageEngineer:
         print("Creating multi-banded tiff...")
         split_tiles = {}
         for f in self.tif_files:
+            # get tile_id from acolite filename
+            tile_id = f.split("_")[-4]
             try:
-                split_tiles[self.id + "_" + self.date].append(f)
+                split_tiles[tile_id + "_" + self.date].append(f)
             except KeyError:
-                split_tiles[self.id + "_" + self.date] = [f]
+                split_tiles[tile_id + "_" + self.date] = [f]
 
         for key, value in split_tiles.items():
             # Read metadata of first file
             with rasterio.open(value[0]) as src0:
                 meta = src0.meta
             # Update meta to reflect the number of layers
-            meta.update(count=len(value))
+            meta.update(count=4)
             # Read each layer and write it to stack
             with rasterio.open(os.path.join(base_path, "data", "unmerged_geotiffs", key + '.tif'), 'w', **meta) as dst:
                 for id, layer in enumerate(value, start=1):

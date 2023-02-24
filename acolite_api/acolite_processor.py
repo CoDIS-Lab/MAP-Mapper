@@ -1,6 +1,5 @@
-import sys, os
+import os
 from utils.dir_management import base_path
-sys.path.insert(0, os.path.join(base_path, "acolite-main"))
 import acolite as ac
 
 

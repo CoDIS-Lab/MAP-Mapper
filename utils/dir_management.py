@@ -34,6 +34,11 @@ def setup_directories():
         dir_operation_selection(dir)
 
 
+def clear_downloads():
+    for dir in os.listdir(os.path.join(data_path, "downloads")):
+        os.remove(os.path.join(data_path, "downloads", dir))
+
+
 def breakdown_directories(date):
     # save outputs
     parent_dir = os.path.join(data_path, "outputs")

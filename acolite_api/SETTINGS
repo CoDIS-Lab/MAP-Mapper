@@ -30,7 +30,7 @@ l2w_mask=False
 #sunglint
 glint_correction=True
 dsf_residual_glint_correction=True
-dsf_residual_glint_correction_method=default
+dsf_residual_glint_correction_method=alternative # index error occuring with default
 dsf_residual_glint_wave_range=1500,2400
 glint_force_band=None
 glint_mask_rhos_wave=1600

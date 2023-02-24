@@ -1,6 +1,7 @@
 import os
 from xml.etree import ElementTree as ET
 
+import geojson
 import pyproj
 import shapely
 from rasterio.enums import Resampling
@@ -63,3 +64,16 @@ def transform_raster(file_path, dst_crs):
                     dst_transform=transform,
                     dst_crs=dst_crs,
                     resampling=Resampling.nearest)
+
+
+def get_min_max_long_lat():
+    with open(os.path.join(base_path, "poly.geojson")) as f:
+        gj = geojson.load(f)
+    features = gj['coordinates'][0]
+    longs = [x[0] for x in features]
+    lats = [x[1] for x in features]
+    min_lon = min(longs)
+    max_lon = max(longs)
+    min_lat = min(lats)
+    max_lat = max(lats)
+    return min_lon, max_lon, min_lat, max_lat
