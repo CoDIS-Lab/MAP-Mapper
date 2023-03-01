@@ -1,0 +1,132 @@
+@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+
+html { width: 100%; height:100%; overflow:hidden; }
+html * {
+    font-family: 'Segoe UI';
+    margin: 0;
+    padding: 0;
+    font-size: large;
+}
+body {
+	width: 100%;
+	height:100%;
+	font-family: 'Segoe UI';
+	color: #darkslategrey;
+	font-size: 24px;
+	text-align:center;
+	letter-spacing:1.4px;
+
+}
+
+/* NAVBAR */
+nav {
+    font-family: "Segoe UI";
+    background-color: #333;
+    overflow: hidden;
+    box-shadow: 0 0 2px 0 rgb(143, 143, 143);
+}
+
+nav ul {
+    font-size: 0;
+}
+.topnav {
+   max-height: 60px;
+}
+
+nav li {
+    display: inline-flex;
+    padding: 0;
+    margin: 0;
+}
+
+nav li a {
+    padding: 20px 25px;
+    text-align: center;
+    font-size: 17px;
+    color:darkslategray;
+    text-decoration: none;
+}
+
+nav {
+    display: flex;
+    align-items:end;
+    background-color: rgb(255, 255, 255);
+    color:darkslategrey !important;
+}
+
+.active {
+    color:purple !important;
+}
+
+nav li a:hover {
+    background-color:rgb(255, 255, 255);
+    display: block;
+    color:rgb(212, 0, 255) !important;
+    transition: 0.5s;
+}
+
+.login {
+	margin: -150px 0 0 -150px;
+	width:400px;
+	height:400px;
+}
+
+.form-container {
+    height: auto;
+    background: lightblue;
+    margin: auto;
+    margin: 70px auto 10px auto;
+    padding: 20px 20px;
+    border-radius: 10px;
+    max-width: 400px;
+}
+
+.login h1 {
+    color: darkslategrey;
+    letter-spacing:1px;
+    text-align:center;
+    margin: 10px;
+    }
+
+input {
+	width: 80%;
+	margin-bottom: 10px;
+	border: none;
+	outline: none;
+	padding: 10px;
+	font-size: 13px;
+	border: 1px solid rgba(0,0,0,0.3);
+	border-radius: 4px;
+	-webkit-transition: box-shadow .5s ease;
+	-moz-transition: box-shadow .5s ease;
+	-o-transition: box-shadow .5s ease;
+	-ms-transition: box-shadow .5s ease;
+	transition: box-shadow .5s ease;
+	}
+
+button {
+    padding: 5px;
+}
+
+.form-container p {
+    text-align: left;
+}
+/* DASHBOARD */
+
+.graph {
+    display: inline-flex;
+}
+
+.dash {
+    margin-top: 30px;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    padding: 10px;
+    width: 100%;
+    background: lightblue;
+    margin: auto;
+    text-align: center;
+}

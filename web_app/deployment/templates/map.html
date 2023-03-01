@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+<body>
+<div class="dash">
+    <div class="graph">
+        <div id='map' class='chart'></div>
+    </div>
+</div>
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+  var map = {{graph_json | safe}};
+  Plotly.plot('map',map,{});
+</script>
+</body>
+{% endblock content %}

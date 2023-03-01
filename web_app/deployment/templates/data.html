@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+<body>
+{% for table in tables %}
+            {{titles[loop.index]}}
+            {{ table|safe }}
+{% endfor %}
+
+<div id='marine_debris_map' class='chart'”></div>
+</body>
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script type='text/javascript'>
+</script>
+{% endblock content %}
