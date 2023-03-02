@@ -1,3 +1,4 @@
+import argparse
 import shutil
 import sys
 
@@ -28,8 +29,26 @@ os.environ['PROJ_LIB'] = '/home/henry/anaconda3/envs/mapper/share/proj'
 os.environ['PROJ_DEBUG'] = "3"
 
 # code for command line interface
-def run_container(product_id):
+
+if __name__ == "__main__":
     
+    parser = argparse.ArgumentParser(description='A sentinel-2 plastic detection pipeline using the MARIDA dataset')
+    subparsers = parser.add_subparsers(help='possible uses', dest='command')
+
+    # FULL MAP-MAPPER PIPELINE
+    job = subparsers.add_parser('run', help='run job')
+    job.add_argument(
+        '-product_id',
+        nargs=1,
+        default=None,
+        type=str,
+        help='id for sentinel product',
+        dest='product_id'
+    )
+
+     # parse args
+    args = parser.parse_args()
+
     downloads_dir = os.path.join(base_path, "data", "unprocessed")
     user_name = os.environ.get('USER_NAME')
     password = os.environ.get('PASSWORD')
@@ -38,13 +57,13 @@ def run_container(product_id):
     # set threshold (only pixels that the model predicts as having >99% chance of being plastic are classified as plastic
     threshold = 0.99
     # print to terminal for easier manual verification
-    print(f"Running MAP-mapper for {product_id}")
+    print(f"Running MAP-mapper for {args.product_id}")
     #set up dirs for processing product
     setup_directories()
     # connect to sentinel hub
     api = SentinelAPI(user_name, password, 'https://apihub.copernicus.eu/apihub')
     # download SAFE file
-    api.download(product_id, downloads_dir)
+    api.download(args.product_id, downloads_dir)
     bundles = os.listdir(downloads_dir)
     print(bundles)
     if bundles:

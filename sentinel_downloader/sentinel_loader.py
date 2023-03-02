@@ -25,7 +25,7 @@ weather_key = os.environ.get('WEATHER')
 
 class SentinelLoader(object):
 
-    def __init__(self, start_date, end_date, max_cloud_percentage, max_wind_speed, tile_id=None):
+    def __init__(self, start_date, end_date, max_cloud_percentage, max_wind_speed=None, tile_id=None):
         # connect to api
         self.cloud_percentage = (0, max_cloud_percentage[0])
         self.download_path = None
