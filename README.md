@@ -3,6 +3,8 @@
 
 <h1> MAP-Mapper – User Guide </h1>
 
+<h2> Edit on 13/October/2023 </h2>
+<p> It has been brought to our attention that model.pth file was missing in the uploaded files. To solve this quickly, we uploaded the file online and you could download this here from the <a href="https://drive.google.com/file/d/1k9k3ansBUzj9EBoJqxGnakgStDMooob7/view?usp=sharing">link</a>
 
 <h2> About </h2>
 <p>Marine Plastic Mapper (MAP-Mapper) is a tool for assessing marine macro-plastic density to identify plastic hotspots, It is designed as a complete pipeline for downloading, processing and plotting suspected plastic detections and is underpinned by the MARIDA dataset.
@@ -26,7 +28,7 @@ These must be placed in a file named “.env” in the sentiner_downloader modul
 Download the “large polygons not split” zip file from https://osmdata.openstreetmap.de/data/land-polygons.html <br>
 unzip the folder and place all files in utils/world_land <br><br>
 
-4. To run MAP-Mapper a valid geojson file must be placed in root directory. This MUST be  called “poly.geojson”.
+4. To run MAP-Mapper a valid geojson file must be placed in the root directory. This MUST be  called “poly.geojson”.
 This file should contain a 4 sided convex polygon of the region you wish to map. This will consist of 5 sets of coordinates. The last set must be identical to the first. 
 for example: <br>
 
@@ -44,7 +46,7 @@ Then run the commands: <br> <br>
 &emsp; pip install /home/<user>/Downloads/GDAL-3.4.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl <br>
 &emsp; pip install gdal-utils <br>
 
-Finally, you must specify where the proj.db file is. If using anaconda this is likely to be in th share folder of the MAP-Mapper environment. <br>
+Finally, you must specify where the proj.db file is. If using anaconda this is likely to be in the shared folder of the MAP-Mapper environment. <br>
 Navigate to run.py and change the environment variable to match this path. <br><br>
 For example: <br>
 &emsp; os.environ['PROJ_LIB'] = '/home/user/anaconda3/envs/map-mapper/share/proj'
